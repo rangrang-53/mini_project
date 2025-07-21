@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>MBTI 답변 결과</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      min-height: 100vh;
+      min-width: 100vw;
+      box-sizing: border-box;
+      background: url('images/school.png') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Noto Sans KR', sans-serif;
+      position: relative;
+    }
+    
+    /* 홈 버튼 스타일 */
+    .home-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 50px;
+      height: 50px;
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 2px solid #2196F3;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      font-size: 24px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .home-button:hover {
+      background-color: #2196F3;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+    }
+    .header {
+      width: 100vw;
+      background: #ededed;
+      height: 160px;
+      min-height: unset;
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      border: none;
+    }
+    .question-box {
+      width: 100vw;
+      min-width: unset;
+      max-width: unset;
+      margin: 0;
+      background: #ededed;
+      border-radius: 0 0 18px 18px;
+      box-shadow: none;
+      padding: 0 0 20px 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2;
+    }
+    .question-text {
+      font-size: 2.2vw;
+      font-weight: bold;
+      margin: 30px 0 18px 0;
+      text-align: center;
+    }
+    .bar-container {
+      width: 60vw;
+      max-width: 500px;
+      min-width: 220px;
+      margin: 0 0 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .bar-label {
+      font-size: 1.2vw;
+      font-weight: bold;
+      color: #222;
+    }
+    .bar-bg {
+      flex: 1;
+      height: 1.2vw;
+      background: #e0e0e0;
+      border-radius: 1vw;
+      margin: 0 1vw;
+      position: relative;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #e57373 70%, #424242 100%);
+      border-radius: 1vw;
+      transition: width 0.5s;
+    }
+    .bar-value {
+      display: none;
+    }
+    .character {
+      width: 14vw;
+      min-width: 120px;
+      max-width: 200px;
+      margin: 180px auto 0 auto;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+    .button-row {
+      position: fixed;
+      right: 4vw;
+      bottom: 4vw;
+      width: auto;
+      margin: 0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.7vw;
+      z-index: 10;
+    }
+    .btn {
+      font-size: 1.2vw;
+      min-width: 70px;
+      padding: 0.7vw 2vw;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-left: 0.5vw;
+      transition: background 0.2s;
+    }
+    .btn.review,
+    .btn.next {
+      /* background: #424242; */
+      background-color: rgba(0,0,0,0.6);
+      color: #fff;
+      transition: background 0.2s;
+    }
+    .btn.review:hover {
+      background: #d69393;
+    }
+    .btn.next:hover {
+      background: #d69393;
+    }
+    .modal-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-box {
+      background: rgba(51,51,51,0.6);
+      color: #fff;
+      border-radius: 12px;
+      padding: 40px 30px 30px 30px;
+      min-width: 320px;
+      max-width: 420px;
+      width: 80vw;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .modal-question {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+    .modal-answer {
+      background: #fff;
+      color: #222;
+      border-radius: 6px;
+      padding: 10px 18px;
+      width: 100%;
+      margin-bottom: 30px;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+    .modal-detail {
+      margin-bottom: 30px;
+      text-align: center;
+      font-size: 1rem;
+      color: #fff;
+    }
+    .modal-close {
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 32px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .modal-close:hover {
+      background: #000000;
+      color: white
+    }
+    @media (max-width: 600px) {
+      .header, .question-box {
+        height: 90px;
+        min-height: unset;
+        padding: 0;
+      }
+      .question-box {
+        border-radius: 0 0 12px 12px;
+        padding-bottom: 10px;
+      }
+      .question-text {
+        font-size: 5vw;
+        margin: 18px 0 10px 0;
+      }
+      .bar-label, .bar-value {
+        font-size: 3vw;
+      }
+      .bar-bg {
+        height: 3vw;
+      }
+      .bar-container {
+        width: 90vw;
+        max-width: unset;
+        min-width: unset;
+      }
+      .character {
+        width: 30vw;
+        min-width: 60px;
+        max-width: 120px;
+        margin-top: 90px;
+      }
+      .button-row {
+        right: 2vw;
+        bottom: 2vw;
+        gap: 1vw;
+      }
+      .btn {
+        font-size: 3vw;
+        padding: 2vw 6vw;
+      }
+      .modal-box {
+        min-width: 0;
+        width: 95vw;
+        padding: 20px 5vw 20px 5vw;
+      }
+      .modal-question { font-size: 1.1rem; }
+      .modal-answer { font-size: 1rem; }
+      .modal-detail { font-size: 0.95rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 홈 버튼 -->
+  <div class="home-button" onclick="goHome()" title="홈으로 가기">🏠</div>
+  
+  <div class="header"></div>
+  <div class="question-box">
+    <div class="question-text" id="questionText">“너 T야?”</div>
+    <div class="bar-container">
+      <span class="bar-label">F</span>
+      <div class="bar-bg">
+        <div class="bar-fill" id="barFill" style="width: 80%;"></div>
+      </div>
+      <span class="bar-label">T</span>
+      <span class="bar-value" id="barValue">80</span>
+    </div>
+  </div>
+  <img src="images/Simple_angry.png" alt="캐릭터" class="character" id="characterImg">
+  <div class="button-row">
+    <button class="btn review" id="reviewBtn">리뷰</button>
+    <button class="btn next" id="nextBtn">다음</button>
+  </div>
+  <div id="reviewDetailModal" class="modal-bg" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-question" id="modalQuestion">"왜 이렇게 말수가 줄었어?"</div>
+      <div class="modal-answer" id="modalAnswer">요즘 생각이 많아져서 그래</div>
+      <div class="modal-detail" id="modalDetail">
+        너의 대답은 극도의 T야
+      </div>
+      <!-- 실천팁/대안답변 분리 표시 영역 추가 -->
+      <div id="modalTip" style="font-weight:bold; color:#ff5e00; font-size:1.1em; margin-bottom:8px; display:none;"></div>
+      <div id="modalAlternative" style="font-size:1em; display:none;"></div>
+      <button class="modal-close" id="modalCloseBtn">닫기</button>
+    </div>
+  </div>
+  <script>
+    // 예시 데이터 (실제 데이터로 교체 가능)
+    const question = "“너 T야?”";
+    const barPercent = 80; // 1~100
+    const characterImg = "images/Simple_angry.png";
+
+    // 적용
+    document.getElementById('questionText').innerText = question;
+    document.getElementById('barFill').style.width = barPercent + "%";
+    document.getElementById('barValue').innerText = barPercent;
+    document.getElementById('characterImg').src = characterImg;
+
+    // 버튼 이벤트 예시
+    document.getElementById('reviewBtn').onclick = async function() {
+      // 기존 예시 데이터 제거
+      document.getElementById('modalQuestion').innerText = '왜 이렇게 말수가 줄었어?';
+      document.getElementById('modalAnswer').innerText = '요즘 생각이 많아져서 그래';
+      document.getElementById('modalDetail').innerText = '너의 대답은 극도의 T야';
+      document.getElementById('modalTip').style.display = 'none';
+      document.getElementById('modalAlternative').style.display = 'none';
+      document.getElementById('reviewDetailModal').style.display = 'flex';
+      document.getElementById('characterImg').style.display = 'none';
+
+      // 실제 API 호출 예시 (질문/답변/점수는 실제 값으로 대체 필요)
+      try {
+        const response = await fetch('/detailed_analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: document.getElementById('questionText').innerText,
+            answer: document.getElementById('modalAnswer').innerText,
+            score: parseFloat(document.getElementById('barValue').innerText)
+          })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // 실천팁/대안답변 분리 표시
+          document.getElementById('modalTip').innerText = data.tip;
+          document.getElementById('modalTip').style.display = '';
+          document.getElementById('modalAlternative').innerText = data.alternative;
+          document.getElementById('modalAlternative').style.display = '';
+        }
+      } catch (e) {
+        // 오류 시 무시 (예시 데이터만 표시)
+      }
+    };
+    document.getElementById('nextBtn').onclick = function() {
+      alert('다음 질문으로 이동');
+      // location.href = 'next.html'; // 실제 다음 페이지로 이동
+    };
+    document.getElementById('modalCloseBtn').onclick = function() {
+      document.getElementById('reviewDetailModal').style.display = 'none';
+      document.getElementById('characterImg').style.display = '';
+    };
+    
+    // 홈으로 가기 함수
+    function goHome() {
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+.env
+debug.log
+__pycache__
+**/__pycache__/
+/__pycache__/
+__pycache__/
+*.env
+**/*.env
+json/

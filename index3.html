@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI T/F 분석기 - 결과</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        body {
+            background-image: url('Question_pg/Bg2.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        /* 최종 결과 페이지 스타일 */
+        @font-face {
+            font-family: 'JejuHallasan';
+            src: url('fonts/JejuHallasan.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'NanumGyuriDiary';
+            src: url('fonts/나눔손글씨 규리의 일기.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        .final-page {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding-top: 2rem;
+        }
+
+        .final-result {
+            margin: 2rem 0;
+        }
+
+        .keyword-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .keyword-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .keyword-category h4 {
+            margin: 0 0 0.8rem 0;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+
+        .keyword-bar-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.6rem;
+            padding: 0.4rem 0;
+        }
+
+        .keyword-label {
+            width: 120px;
+            font-size: 1em;
+            color: #2c3e50;
+            text-align: right;
+            margin-right: 1rem;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .keyword-bar-bg {
+            flex: 1;
+            height: 24px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .keyword-bar {
+            height: 100%;
+            border-radius: 10px;
+            position: relative;
+            transition: width 0.8s ease;
+        }
+
+        .keyword-bar.t-type {
+            background: linear-gradient(90deg, #ff6b6b, #ff8e53);
+        }
+
+        .keyword-bar.f-type {
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+        }
+
+        .keyword-count {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.9em;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        .tts-button {
+            padding: 0.8rem 1.5rem;
+            background-color: #9C27B0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .tts-button:hover {
+            background-color: #7B1FA2;
+            transform: scale(1.05);
+        }
+        .result-flex-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            gap: 2rem;
+        }
+        .final-graph-section {
+            flex: 0 0 340px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 320px;
+            margin-top: 2rem;
+        }
+        .circle-graph-box {
+            width: 300px;
+            margin-bottom: 2rem;
+            margin-left: 10px;
+            box-shadow: none !important;
+            border: none !important;
+            background: none !important;
+        }
+        @media (max-width: 600px) {
+          .circle-graph-box {
+            margin-left: 0 !important;
+          }
+        }
+        .tf-indicator-row {
+            display: flex;
+            flex-direction: row;
+            gap: 1.5rem;
+            width: 100%;
+            justify-content: flex-start;
+        }
+        .tf-indicator {
+            flex: 1 1 0;
+            text-align: center;
+            padding: 1.5rem 0.8rem;
+            border-radius: 20px;
+            color: white;
+            font-size: 1.3em;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+        }
+        .tf-indicator.t {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+        }
+        .tf-indicator.f {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+        }
+        .final-review-section {
+            flex: 1 1 0;
+            min-width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-top: 2rem;
+        }
+        .review-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            width: 100%;
+        }
+        .review-tab-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 56px;
+            padding: 0;
+            flex: 1 1 0;
+            min-width: 0;
+            background: transparent;
+            border: none;
+            border-radius: 7px 7px 0 0;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s, background 0.2s;
+            color: #fff !important;
+        }
+        .review-tab-btn.active {
+            background: transparent;
+            color: #ffd700 !important;
+            transform: scale(1.12);
+            z-index: 2;
+        }
+        .review-tab-btn:hover {
+            background: transparent;
+            transform: scale(1.12);
+            z-index: 2;
+        }
+        .tab-icon {
+            max-height: 90%;
+            max-width: 90%;
+            object-fit: contain;
+            display: block;
+        }
+        .review-content-box {
+            width: 100%;
+            min-height: 220px;
+            background: transparent;
+            border-radius: 0 0 15px 15px;
+            box-shadow: none !important;
+            border: none !important;
+            background-color: transparent !important;
+            padding: 2rem 1.5rem;
+            font-size: 1.1em;
+            color: #333;
+        }
+        @media (max-width: 900px) {
+          .review-content-box {
+            padding: 1.2rem 0.5rem;
+            font-size: 1em;
+            min-height: 160px;
+            border-radius: 14px;
+          }
+        }
+        @media (max-width: 600px) {
+          .review-content-box {
+            background: none !important;
+            background-color: transparent !important;
+            color: #fff;
+            border-radius: 1px;
+            min-height: 300px;
+            padding: 1.2rem 0.5rem;
+            font-size: 1em;
+            box-shadow: none !important;
+          }
+        }
+        @media (max-width: 600px) {
+          .result-bg-box > .bg-img {
+            display: none !important;
+          }
+        }
+        .result-bg-box {
+            position: relative;
+            width: 60vw;
+            max-width: 1000px;
+            aspect-ratio: 16 / 9;
+            margin: 0 auto 2rem auto;
+            border-radius: 30px;
+            box-shadow: 0 6px 32px rgba(0,0,0,0.18);
+            overflow: hidden;
+        }
+        .result-bg-box .bg-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            border-radius: 30px;
+            z-index: 0;
+            position: relative;
+        }
+        .result-bg-box .result-flex-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            padding: 4vw 3vw;
+            box-sizing: border-box;
+            z-index: 1;
+        }
+        .container, .final-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (max-width: 900px) {
+          .result-flex-container {
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+            max-width: 98vw;
+          }
+          .final-graph-section, .final-review-section {
+            min-width: 0;
+            width: 100%;
+            margin-top: 1rem;
+            align-items: center;
+          }
+          .circle-graph-box {
+            width: 90vw;
+            max-width: 320px;
+          }
+          .review-content-box {
+            padding: 1.2rem 0.5rem;
+            font-size: 1em;
+          }
+          .review-tabs {
+            flex-direction: row;
+            gap: 0.2rem;
+            width: 100%;
+          }
+        }
+        @media (max-width: 600px) {
+          .container, .final-page {
+            padding: 0.2rem 0.1rem;
+            min-width: 0;
+            width: 100vw;
+            box-sizing: border-box;
+            min-height: 100vh;
+            justify-content: flex-start;
+            align-items: center;
+          }
+          #finalOneLiner > div {
+            position: relative;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 900px;
+            min-width: 0;
+            margin: 0 auto 2rem auto;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          #finalOneLiner img {
+            width: 100%;
+            max-width: 900px;
+            height: auto;
+            display: block;
+          }
+          #finalOneLiner .oneliner-text {
+            font-size: 1.1em;
+            width: 92%;
+            padding: 0.2em 0.1em;
+          }
+          .result-bg-box {
+            width: 95vw;
+            min-width: 0;
+            max-width: 95vw;
+            aspect-ratio: unset;
+            border-radius: 8px;
+            padding: 0;
+            margin: 0 auto 0.5em auto;
+            box-sizing: border-box;
+            min-height: auto;
+            background: url('Final/Black_board.png') center/cover no-repeat !important;
+            background-color: rgba(0,0,0,0.10) !important;
+            border-radius: 1px;
+            min-height: 300px;
+          }
+          .result-bg-box .result-flex-container {
+            position: static;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.3em 0.1em;
+            gap: 0.3em;
+            width: 100%;
+            box-sizing: border-box;
+          }
+          .final-graph-section, .final-review-section {
+            min-width: 0;
+            width: 100%;
+            margin-top: 0.2em;
+            align-items: center;
+            box-sizing: border-box;
+          }
+          .circle-graph-box {
+            width: 80vw;
+            max-width: 180px;
+            margin: 0 auto 0.3em auto;
+          }
+          .tf-indicator-row {
+            flex-direction: row;
+            gap: 0.3rem;
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 0.2em;
+          }
+          .tf-indicator {
+            padding: 0.5rem 0.3rem;
+            font-size: 0.9em;
+          }
+          .review-tabs {
+            flex-direction: row;
+            gap: 0.1rem;
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 0.3em;
+          }
+          .review-tab-btn {
+            font-size: 0.8em;
+            height: 35px;
+            min-width: 0;
+            padding: 0 1px;
+            flex: 1 1 0;
+            box-sizing: border-box;
+          }
+          .review-content-box {
+            padding: 0.4rem 0.1rem;
+            font-size: 0.85em;
+            min-width: 0;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 120px;
+          }
+          .tts-button {
+            width: 100%;
+            margin: 0.3rem 0 0 0;
+            padding: 0.5rem 0;
+            font-size: 0.9em;
+            box-sizing: border-box;
+          }
+          .start-button {
+            width: 95vw;
+            margin: 0.5em 0 0 0;
+            font-size: 1em;
+            padding: 0.8em 0;
+            box-sizing: border-box;
+          }
+        }
+        @media (max-width: 600px) {
+          #finalOneLiner div[style*='position: absolute'] {
+            font-size: 2.2em !important;
+          }
+        }
+        @media (max-width: 600px) {
+          #finalOneLiner div[style*='position: absolute'] {
+            font-size: 1.1em !important;
+          }
+        }
+        .review-green-box {
+            background: transparent;
+            border-radius: 18px;
+            padding: 1.2rem 1.2rem 1.5rem 1.2rem;
+            box-shadow: none !important;
+            border: none !important;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+        }
+        @media (max-width: 900px) {
+            .review-green-box {
+                padding: 0.7rem 0.3rem 1rem 0.3rem;
+                max-width: 98vw;
+                border-radius: 12px;
+            }
+        }
+        @media (max-width: 600px) {
+            .review-green-box {
+                padding: 0.4rem 0.1rem 0.7rem 0.1rem;
+                max-width: 99vw;
+                border-radius: 8px;
+            }
+        }
+        @media (max-width: 600px) {
+          .circle-graph-box {
+            margin-top: 2.2rem !important;
+            margin-left: -30px !important;
+          }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="final-page" id="finalPage">
+            <!-- <h1>최종 분석 결과</h1> -->
+            <div id="finalOneLiner"></div>
+            <div class="result-bg-box">
+                <img src="Final/Black_board.png" alt="" class="bg-img">
+                <div class="result-flex-container">
+                    <div class="final-graph-section">
+                        <div id="finalGraph"></div>
+                    </div>
+                    <div class="final-review-section">
+                        <div class="review-green-box">
+                            <div class="review-tabs">
+                                <button class="review-tab-btn" id="tab-comm"><img src="Final/Effective_white.png" data-hover="Final/Effective_yellow.png" alt="소통법" class="tab-icon"></button>
+                                <button class="review-tab-btn" id="tab-strength"><img src="Final/Yougood_white.png" data-hover="Final/Yougood_yellow.png" alt="강점" class="tab-icon"></button>
+                                <button class="review-tab-btn" id="tab-growth"><img src="Final/Improve_white.png" data-hover="Final/Improve_yellow.png" alt="성장" class="tab-icon"></button>
+                            </div>
+                            <div class="review-content-box" id="reviewContentBox"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="location.href='index1.html'" class="start-button">다시 분석하기</button>
+        </div>
+    </div>
+
+    <script>
+        // API 기본 URL 설정
+        const API_BASE_URL = window.location.origin;
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                console.log('index3.html 페이지 로드 시작...');
+                
+                const storedResults = sessionStorage.getItem('mbtiResults');
+                console.log('세션 스토리지에서 읽은 데이터:', storedResults);
+                
+                if (!storedResults) {
+                    console.error('세션 스토리지에 결과가 없습니다.');
+                    alert('분석 결과를 찾을 수 없습니다. 처음부터 다시 시작해주세요.');
+                    window.location.href = 'index1.html';
+                    return;
+                }
+                
+                const results = JSON.parse(storedResults);
+                console.log('파싱된 결과:', results);
+                
+                if (!results || !results.length) {
+                    console.error('결과 배열이 비어있습니다.');
+                    alert('분석 결과가 올바르지 않습니다. 처음부터 다시 시작해주세요.');
+                    window.location.href = 'index1.html';
+                    return;
+                }
+
+                console.log('최종 결과 표시 시작...');
+                showFinalResult(results);
+            } catch (error) {
+                console.error('index3.html 초기화 중 오류:', error);
+                alert('결과 페이지 로드 중 오류가 발생했습니다: ' + error.message);
+                window.location.href = 'index1.html';
+            }
+        });
+
+        // 최종 결과 표시
+        async function showFinalResult(results) {
+            const averageScore = results.reduce((sum, r) => sum + r.score, 0) / results.length;
+            const tPercentage = Math.round((100 - averageScore) / 10) * 10;
+            const fPercentage = Math.round(averageScore / 10) * 10;
+            
+            // 기본 정보 표시
+            document.getElementById('finalOneLiner').innerHTML = `
+                <div style="position: relative; display: inline-block; margin: 0 auto 2rem auto;">
+                    <img src="Final/White_board.png" alt="분석 결과 이미지" style="display: block; max-width: 100%; height: auto;">
+                    <div style="
+                        position: absolute;
+                        top: 50%; left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 90%;
+                        color: #333;
+                        font-size: 30PX;
+                        font-weight: bold;
+                        text-align: center;
+                        word-break: keep-all;
+                        line-height: 1.3;
+                        font-family: 'JejuHallasan', sans-serif;
+                        ">
+                        ${getFinalOneLiner(averageScore)}
+                    </div>
+                </div>
+            `;
+            
+            // 그래프 표시 (원형 그래프 상단, T/F 지표 하단 가로)
+            document.getElementById('finalGraph').innerHTML = `
+                <div class="circle-graph-box">
+                    <svg width="260" height="260">
+                        <circle cx="130" cy="130" r="116" fill="none" stroke="#fff" stroke-width="8"/>
+                        <circle cx="130" cy="130" r="94" fill="none" stroke="#fff" stroke-width="8"/>
+                        <circle cx="130" cy="130" r="105" fill="none" stroke="#f8f9fa" stroke-width="26" transform="rotate(-90 130 130)"/>
+                        <circle cx="130" cy="130" r="105" fill="none" stroke="#ff6b6b" stroke-width="26" 
+                                stroke-dasharray="${(100-averageScore) * 6.6} 660" stroke-linecap="round" transform="rotate(-90 130 130)"/>
+                        <circle cx="130" cy="130" r="105" fill="none" stroke="#4ecdc4" stroke-width="26" 
+                                stroke-dasharray="${averageScore * 6.6} 660" 
+                                stroke-dashoffset="${-(100-averageScore) * 6.6}" stroke-linecap="round" transform="rotate(-90 130 130)"/>
+                        <text x="130" y="130" text-anchor="middle" dominant-baseline="middle" font-size="2.5em" font-weight="bold" stroke="#fff" stroke-width="10" paint-order="stroke" fill="#2c3e50">${averageScore.toFixed(1)}%</text>
+                        <text x="130" y="130" text-anchor="middle" dominant-baseline="middle" font-size="2.5em" font-weight="bold" fill="#2c3e50">${averageScore.toFixed(1)}%</text>
+                        <text x="130" y="160" text-anchor="middle" dominant-baseline="middle" font-size="1.2em" font-weight="bold" fill="#2c3e50">F-성향</text>
+                    </svg>
+                </div>
+                <div class="tf-indicator-row">
+                    <div class="tf-indicator f">
+                        <div style="font-size: 1.1em; margin-bottom: 0.3rem;">F-성향</div>
+                        <div style="font-size: 1.5em; font-weight: bold;">${averageScore.toFixed(1)}%</div>
+                    </div>
+                    <div class="tf-indicator t">
+                        <div style="font-size: 1.1em; margin-bottom: 0.3rem;">T-성향</div>
+                        <div style="font-size: 1.5em; font-weight: bold;">${(100-averageScore).toFixed(1)}%</div>
+                    </div>
+                </div>
+            `;
+            
+            // finalReview는 탭 구조로 대체하므로 초기에는 아무 내용도 표시하지 않음
+            document.getElementById('reviewContentBox').innerHTML = '';
+            
+            try {
+                // AI 종합 분석 요청
+                const response = await fetch(`${API_BASE_URL}/final_analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        results: results
+                    })
+                });
+
+                const finalAnalysis = await response.json();
+                
+                // 탭별 내용 저장
+                const commText = finalAnalysis.communication_strategy.replace(/\n/g, ' ');
+                const commExamples = [];
+                const regex = /"([^"]+)"/g;
+                let match;
+                while ((match = regex.exec(commText)) !== null && commExamples.length < 3) {
+                    commExamples.push('"' + match[1].trim() + '"');
+                }
+                while (commExamples.length < 3) commExamples.push('');
+                const commLines = [
+                    'F 성향 상대와의 효과적인 소통법',
+                    ...commExamples
+                ].slice(0, 4).join('<br>');
+                window.finalReviewTabs = {
+                    comm: `<div style='line-height:1.6; font-size:1.15em; color:#fff; font-weight:bold; white-space:pre-line; font-family: "NanumGyuriDiary", sans-serif; text-align:left;'>
+        <div style="font-size:1.18em; color:#ffd700; font-weight:700; margin-bottom:0.5em;">F 성향 상대와의 효과적인 소통법</div>
+        <div style="color:#ffd700; font-size:1.05em; font-weight:700; margin-bottom:0.2em;">[내 부족한 점]</div>
+        <ul style="margin:0 0 0.5em 1.1em; padding:0; color:#fff; font-size:1em; font-weight:400; list-style:square inside;">
+            ${{
+                improvement_points: (finalAnalysis.improvement_points && finalAnalysis.improvement_points.length > 0)
+                    ? finalAnalysis.improvement_points.map(p=>`<li style='margin-bottom:0.1em;'>${p}</li>`).join('')
+                    : '<li style=\'margin-bottom:0.1em;\'>감정 표현이 부족합니다.</li><li style=\'margin-bottom:0.1em;\'>공감적 반응이 적습니다.</li>'
+            }.improvement_points}
+        </ul>
+        <div style="color:#ffd700; font-size:1.05em; font-weight:700; margin-bottom:0.2em;">[개선 팁]</div>
+        <ul style="margin:0 0 0.2em 1.1em; padding:0; color:#fff; font-size:1em; font-weight:400; list-style:square inside;">
+            ${{
+                improvement_tips: (finalAnalysis.improvement_tips && finalAnalysis.improvement_tips.length > 0)
+                    ? finalAnalysis.improvement_tips.map(t=>`<li style='margin-bottom:0.1em;'>${t}</li>`).join('')
+                    : '<li style=\'margin-bottom:0.1em;\'>상대의 감정을 먼저 인정해 주세요.</li><li style=\'margin-bottom:0.1em;\'>논리적 설명 전에 공감의 말을 건네보세요.</li><li style=\'margin-bottom:0.1em;\'>"네가 그렇게 느꼈구나"와 같은 문장으로 시작해보세요.</li>'
+            }.improvement_tips}
+        </ul>
+    </div>`,
+                    strength: `<div style='display:flex; flex-wrap:wrap; justify-content:center; text-align:center; gap:0.5rem; margin-top:0.5rem; font-family: "NanumGyuriDiary", sans-serif; font-size:1.25em;'>
+                        ${finalAnalysis.strengths.map(strength => `<span style='display:inline-block; background:linear-gradient(90deg,#ffe066,#ffd700); color:#333; font-weight:bold; border-radius:20px; padding:0.4em 1em; font-size:1em; box-shadow:0 2px 8px rgba(255,224,102,0.15); margin-bottom:0.2em;'>#${strength.replace(/\s+/g, '')}</span>`).join('')}
+                    </div>
+                    <button class="tts-button" onclick="playTTS('당신의 강점은 ${finalAnalysis.strengths.join(", ")} 입니다.')" style="margin-top:1rem; font-family: "NanumGyuriDiary", sans-serif;">🔊 듣기</button>`,
+                    growth: `<div style='display:flex; flex-wrap:wrap; justify-content:center; text-align:center; gap:0.5rem; margin-top:0.5rem; font-family: "NanumGyuriDiary", sans-serif; font-size:1.25em;'>
+    ${finalAnalysis.growth_areas.map(area => `<span style='display:inline-block; background:linear-gradient(90deg,#ffe066,#ffd700); color:#333; font-weight:bold; border-radius:20px; padding:0.4em 1em; font-size:1em; box-shadow:0 2px 8px rgba(255,224,102,0.15); margin-bottom:0.2em;'>#${area}</span>`).join('')}
+</div>
+<button class="tts-button" onclick="playTTS('성장 포인트는 ${finalAnalysis.growth_areas.join(", ")} 입니다.')" style="margin-top:1rem; font-family: \"NanumGyuriDiary\", sans-serif;">🔊 듣기</button>`,
+                };
+                // 탭 이벤트 바인딩 (JS 부분)
+                const tabBtns = [
+                    {id: 'tab-comm', key: 'comm'},
+                    {id: 'tab-strength', key: 'strength'},
+                    {id: 'tab-growth', key: 'growth'}
+                ];
+                tabBtns.forEach(({id, key}) => {
+                    const btn = document.getElementById(id);
+                    btn.onclick = function() {
+                        tabBtns.forEach(({id:otherId}) => document.getElementById(otherId).classList.remove('active'));
+                        btn.classList.add('active');
+                        document.getElementById('reviewContentBox').innerHTML = window.finalReviewTabs[key];
+                    }
+                });
+                // 초기에는 '효과적인 소통법' 탭을 활성화
+                const commTab = document.getElementById('tab-comm');
+                commTab.classList.add('active');
+                const commImg = commTab.querySelector('img');
+                if (commImg && commImg.getAttribute('data-hover')) {
+                    commImg.src = commImg.getAttribute('data-hover');
+                }
+                document.getElementById('reviewContentBox').innerHTML = window.finalReviewTabs.comm;
+                
+            } catch (error) {
+                console.error('Error fetching final analysis:', error);
+                document.getElementById('reviewContentBox').innerHTML = `<div style='background: #f8d7da; padding: 2rem; border-radius: 15px; border-left: 5px solid #dc3545; color: #721c24;'><h3 style='margin-top:0;'>⚠️ 분석 오류</h3><p>종합 분석 중 오류가 발생했습니다. 기본 분석 결과를 표시합니다.</p><div style='margin-top:1rem;'>${getFinalReview(averageScore)}</div></div>`;
+            }
+        }
+
+        // 최종 한 줄 평가 생성 - 더 다양한 템플릿
+        function getFinalOneLiner(score) {
+            const templates = {
+                'very_t': [  // 0-20점
+                    "냉철한 논리 머신! 감정? 그게 뭔가요?",
+                    "팩트 폭격기! 데이터가 곧 진리죠?",
+                    "이성의 지배자! 감정은 논리 앞에 무릎 꿇어!",
+                    "객관성의 대가! 감정 따위는 논리 앞에 무릎 꿇어!",
+                    "논리의 수호자! 감정은 논리 앞에 무릎 꿇어!"
+                ],
+                'strong_t': [  // 20-35점
+                    "논리적 사고의 달인! 감정도 논리로 정복해요",
+                    "객관성의 기사! 감정도 논리로 다스려요",
+                    "이성의 기수! 논리로 감정도 정복해요",
+                    "팩트의 기사! 감정도 논리로 다스려요",
+                    "논리의 기수! 감정도 논리로 정복해요"
+                ],
+                'mild_t': [  // 35-45점
+                    "논리와 감정의 균형잡는 달인!",
+                    "이성과 감성의 줄타기 고수!",
+                    "객관과 주관의 조화로운 춤사위!",
+                    "논리와 감정의 완벽한 조화!",
+                    "이성과 감성의 균형잡는 달인!"
+                ],
+                'balanced': [  // 45-55점
+                    "논리와 감정의 줄타기 달인! 양다리 고수네요~",
+                    "이성과 감성의 완벽한 균형잡는 달인!",
+                    "객관과 주관의 조화로운 춤사위!",
+                    "논리와 감정의 완벽한 조화!",
+                    "이성과 감성의 균형잡는 달인!"
+                ],
+                'mild_f': [  // 55-65점
+                    "감정 공감 레이더! 눈물 한 방울도 놓치지 않죠?",
+                    "공감의 달인! 감정을 읽는 레이더!",
+                    "감성의 기사! 감정을 읽는 달인!",
+                    "공감의 기수! 감정을 읽는 레이더!",
+                    "감성의 달인! 감정을 읽는 기사!"
+                ],
+                'strong_f': [  // 65-80점
+                    "감정 공감 레이더! 눈물 한 방울도 놓치지 않죠?",
+                    "공감의 달인! 감정을 읽는 레이더!",
+                    "감성의 기사! 감정을 읽는 달인!",
+                    "공감의 기수! 감정을 읽는 레이더!",
+                    "감성의 달인! 감정을 읽는 기사!"
+                ],
+                'very_f': [  // 80-100점
+                    "완전 감성팩토리! 드라마 보다가 티슈 몇 박스 써요?",
+                    "감정 공감의 대가! 눈물 한 방울도 놓치지 않죠?",
+                    "공감의 마스터! 감정을 읽는 달인!",
+                    "감성의 대가! 감정을 읽는 마스터!",
+                    "공감의 마스터! 감정을 읽는 대가!"
+                ]
+            };
+            
+            // 점수 구간별 카테고리 선택
+            let category;
+            if (score < 20) category = 'very_t';
+            else if (score < 35) category = 'strong_t';
+            else if (score < 45) category = 'mild_t';
+            else if (score < 55) category = 'balanced';
+            else if (score < 65) category = 'mild_f';
+            else if (score < 80) category = 'strong_f';
+            else category = 'very_f';
+            
+            // 랜덤하게 템플릿 선택
+            return templates[category][Math.floor(Math.random() * templates[category].length)];
+        }
+
+        // 최종 리뷰 생성 - 더 다양한 템플릿
+        function getFinalReview(score) {
+            const reviewTemplates = {
+                'very_t': [  // 0-20점
+                    `
+                        <p>당신은 매우 논리적이고 객관적인 판단을 선호합니다.</p>
+                        <p>감정보다는 사실과 논리에 기반하여 결정을 내리는 경향이 강합니다.</p>
+                        <p>문제 해결 능력이 뛰어나며, 효율적인 의사결정을 잘 하실 것 같네요.</p>
+                    `,
+                    `
+                        <p>매우 뛰어난 논리적 사고 능력을 가지고 계십니다.</p>
+                        <p>객관적이고 체계적인 접근 방식을 선호하시는 것 같네요.</p>
+                        <p>효율성과 정확성을 중시하는 성향이 강하게 나타납니다.</p>
+                    `,
+                    `
+                        <p>논리적이고 분석적인 사고방식을 가지고 계십니다.</p>
+                        <p>감정보다는 사실과 데이터에 기반한 판단을 선호하시네요.</p>
+                        <p>체계적이고 효율적인 문제 해결 능력이 뛰어납니다.</p>
+                    `
+                ],
+                'strong_t': [  // 20-35점
+                    `
+                        <p>논리적 사고를 바탕으로 하되, 감정적 요소도 고려하시는 편입니다.</p>
+                        <p>객관적 판단을 중시하지만, 상황에 따라 유연한 대처도 가능하십니다.</p>
+                        <p>균형 잡힌 사고방식을 가지고 있으나, T 성향이 조금 더 강합니다.</p>
+                    `,
+                    `
+                        <p>논리적 사고가 우선이지만, 감정적 측면도 어느 정도 고려하시네요.</p>
+                        <p>객관적 판단을 중시하면서도 유연한 접근이 가능합니다.</p>
+                        <p>T 성향이 강하지만 감정적 요소도 배제하지 않는 균형감이 있습니다.</p>
+                    `,
+                    `
+                        <p>논리적 사고를 기본으로 하되, 감정적 요소도 고려하는 성향입니다.</p>
+                        <p>객관적 판단을 선호하지만 상황에 따라 유연하게 대응할 수 있습니다.</p>
+                        <p>효율성을 중시하면서도 감정적 측면을 무시하지 않는 균형감이 있습니다.</p>
+                    `
+                ],
+                'mild_t': [  // 35-45점
+                    `
+                        <p>논리와 감정 사이에서 좋은 균형을 이루고 계십니다.</p>
+                        <p>논리적 사고를 기본으로 하되, 감정적 측면도 적절히 고려하시네요.</p>
+                        <p>객관적 판단과 감정적 공감의 조화를 잘 이루고 있습니다.</p>
+                    `,
+                    `
+                        <p>논리적 사고와 감정적 공감 능력이 잘 조화되어 있습니다.</p>
+                        <p>객관적 판단을 중시하면서도 감정적 측면도 고려하는 균형감이 있습니다.</p>
+                        <p>효율성과 공감 능력이 적절히 조화된 성향을 보여줍니다.</p>
+                    `,
+                    `
+                        <p>논리와 감정의 균형을 잘 이루고 계십니다.</p>
+                        <p>객관적 판단과 감정적 공감을 적절히 조절할 수 있는 능력이 있습니다.</p>
+                        <p>효율적이면서도 따뜻한 접근 방식을 선호하는 성향입니다.</p>
+                    `
+                ],
+                'balanced': [  // 45-55점
+                    `
+                        <p>논리와 감정 사이에서 훌륭한 균형을 이루고 계십니다.</p>
+                        <p>상황에 따라 객관적 판단과 감정적 공감을 적절히 사용하시는 것 같네요.</p>
+                        <p>다양한 관점에서 문제를 바라볼 수 있는 능력이 있습니다.</p>
+                    `,
+                    `
+                        <p>논리와 감정의 완벽한 균형을 이루고 계십니다.</p>
+                        <p>객관적 판단과 감정적 공감을 상황에 맞게 적절히 활용하시네요.</p>
+                        <p>다양한 관점에서 문제를 바라볼 수 있는 뛰어난 능력을 가지고 있습니다.</p>
+                    `,
+                    `
+                        <p>논리와 감정의 조화로운 균형을 이루고 계십니다.</p>
+                        <p>상황에 따라 논리적 사고와 감정적 공감을 적절히 조절할 수 있습니다.</p>
+                        <p>객관적 판단과 감정적 배려의 완벽한 조화를 보여줍니다.</p>
+                    `
+                ],
+                'mild_f': [  // 55-65점
+                    `
+                        <p>감정적 공감 능력이 뛰어나며, 다른 사람의 감정을 잘 이해하십니다.</p>
+                        <p>논리적 판단도 가능하지만, 감정적 요소를 더 중요하게 고려하시는 편입니다.</p>
+                        <p>인간관계에서 뛰어난 능력을 발휘하실 것 같네요.</p>
+                    `,
+                    `
+                        <p>뛰어난 감정적 공감 능력을 가지고 계십니다.</p>
+                        <p>논리적 사고도 가능하지만 감정적 측면을 더 중시하는 성향입니다.</p>
+                        <p>인간관계에서 탁월한 능력을 보여주실 것 같네요.</p>
+                    `,
+                    `
+                        <p>감정적 공감 능력이 매우 뛰어납니다.</p>
+                        <p>논리적 판단과 감정적 공감을 모두 할 수 있지만, 감정적 측면을 더 중시합니다.</p>
+                        <p>인간관계에서 뛰어난 능력을 발휘할 수 있는 성향입니다.</p>
+                    `
+                ],
+                'strong_f': [  // 65-80점
+                    `
+                        <p>매우 뛰어난 감정적 공감 능력을 가지고 계십니다.</p>
+                        <p>다른 사람의 감정을 깊이 이해하고 배려하는 성향이 매우 강합니다.</p>
+                        <p>인간관계에서 탁월한 능력을 보여주실 것 같네요.</p>
+                    `,
+                    `
+                        <p>완벽한 감정적 공감 능력을 가지고 계십니다.</p>
+                        <p>다른 사람의 감정을 깊이 이해하고 배려하는 성향이 매우 강합니다.</p>
+                        <p>인간관계에서 뛰어난 능력을 발휘할 수 있는 성향입니다.</p>
+                    `,
+                    `
+                        <p>매우 뛰어난 감정적 공감 능력을 보여줍니다.</p>
+                        <p>다른 사람의 감정을 깊이 이해하고 배려하는 성향이 매우 강합니다.</p>
+                        <p>인간관계에서 탁월한 능력을 발휘할 수 있는 성향입니다.</p>
+                    `
+                ],
+                'very_f': [  // 80-100점
+                    `
+                        <p>완벽한 감정적 공감 능력을 가지고 계십니다.</p>
+                        <p>다른 사람의 감정을 깊이 이해하고 배려하는 성향이 매우 강합니다.</p>
+                        <p>인간관계에서 탁월한 능력을 보여주실 것 같네요.</p>
+                    `,
+                    `
+                        <p>매우 뛰어난 감정적 공감 능력을 가지고 계십니다.</p>
+                        <p>다른 사람의 감정을 깊이 이해하고 배려하는 성향이 매우 강합니다.</p>
+                        <p>인간관계에서 탁월한 능력을 발휘할 수 있는 성향입니다.</p>
+                    `,
+                    `
+                        <p>완벽한 감정적 공감 능력을 보여줍니다.</p>
+                        <p>다른 사람의 감정을 깊이 이해하고 배려하는 성향이 매우 강합니다.</p>
+                        <p>인간관계에서 탁월한 능력을 발휘할 수 있는 성향입니다.</p>
+                    `
+                ]
+            };
+            
+            // 점수 구간별 카테고리 선택
+            let category;
+            if (score < 20) category = 'very_t';
+            else if (score < 35) category = 'strong_t';
+            else if (score < 45) category = 'mild_t';
+            else if (score < 55) category = 'balanced';
+            else if (score < 65) category = 'mild_f';
+            else if (score < 80) category = 'strong_f';
+            else category = 'very_f';
+            
+            // 랜덤하게 템플릿 선택
+            return reviewTemplates[category][Math.floor(Math.random() * reviewTemplates[category].length)];
+        }
+
+        // 전역 오디오 객체 선언
+        let currentAudio = null;
+        // TTS 기능
+        async function playTTS(text) {
+            try {
+                const formData = new FormData();
+                formData.append('text', text);
+
+                // 기존에 재생 중인 오디오가 있으면 중지
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                    currentAudio = null;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/tts`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('TTS 처리 중 오류가 발생했습니다.');
+
+                const blob = await response.blob();
+                currentAudio = new Audio(URL.createObjectURL(blob));
+                currentAudio.play();
+            } catch (error) {
+                console.error('TTS Error:', error);
+                alert('음성 재생 중 오류가 발생했습니다.');
+            }
+        }
+    </script>
+    <script>
+        // 탭 버튼 이미지 hover/active 시 이미지 변경 및 active 관리
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabBtns = document.querySelectorAll('.review-tab-btn');
+            tabBtns.forEach(btn => {
+                const img = btn.querySelector('img');
+                if (!img) return;
+                // 최초에 원본 src(흰색)와 data-hover(노란색)를 별도 속성에 저장
+                img.setAttribute('data-src-original', img.getAttribute('src'));
+                img.setAttribute('data-hover-original', img.getAttribute('data-hover'));
+
+                // Hover 효과
+                btn.addEventListener('mouseenter', () => {
+                    if (!btn.classList.contains('active')) img.src = img.getAttribute('data-hover-original');
+                });
+                btn.addEventListener('mouseleave', () => {
+                    if (!btn.classList.contains('active')) img.src = img.getAttribute('data-src-original');
+                });
+
+                // 클릭 시 active 관리 및 이미지 변경
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => {
+                        b.classList.remove('active');
+                        const i = b.querySelector('img');
+                        if (i) {
+                            // 모든 탭 이미지를 항상 src(흰색)로 되돌림
+                            i.src = i.getAttribute('data-src-original');
+                        }
+                    });
+                    btn.classList.add('active');
+                    // 선택된 탭만 hover(노란색) 이미지로
+                    img.src = img.getAttribute('data-hover-original');
+                });
+            });
+
+            // 최초 활성화 탭 이미지도 hover로
+            const activeBtn = document.querySelector('.review-tab-btn.active');
+            if (activeBtn) {
+                const img = activeBtn.querySelector('img');
+                const hover = img && img.getAttribute('data-hover-original');
+                if (img && hover) img.src = hover;
+            }
+        });
+        </script>
+</body>
+</html> 

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/reset.css">
+    <script src="/static/js/main.js"></script>
+    <title>너 T야?</title>
+    <style>
+        /* 홈 버튼 스타일 */
+        .home-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid #2196F3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .home-button:hover {
+            background-color: #2196F3;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- 홈 버튼 -->
+    <div class="home-button" onclick="goHome()" title="홈으로 가기">🏠</div>
+    
+<main>
+    <div id="main_title">
+        <div id="main_logo"></div>
+        <!-- <h1>너 T야?</h1> -->
+    </div>
+    <div id="main_content">
+        <div class="main_content_box">
+            <p>문제 개수를 선택하세요.</p>
+            <div id="question_count">
+                <label class="question_count_box">
+                    <input type="checkbox" id="question_count_1" name="question_count" value="1">
+                    <span>1개</span>
+                </label>
+                <label class="question_count_box">
+                    <input type="checkbox" id="question_count_3" name="question_count" value="3">
+                    <span>3개</span>
+                </label>
+                <label class="question_count_box">
+                    <input type="checkbox" id="question_count_5" name="question_count" value="5">
+                    <span>5개</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="main_content_box">
+            <p>문제 타입을 선택하세요.</p>
+            <div id="question_type">
+                <label class="question_type_box">
+                    <input type="checkbox" id="question_meme" name="meme" value="meme">
+                    <span>인터넷 밈(json하드코딩)</span>
+                </label>
+                <label class="question_type_box">
+                    <input type="checkbox" id="question_ai" name="aiSettings" value="aiSettings">
+                    <span>AI 맞춤형(Gemini 연동)</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <input type="button" value="시작" id="start_button">
+    
+    <!-- 리뷰 모달 샘플 버튼 복원 -->
+    <button id="sample_review_btn" style="margin-top:30px;">리뷰 모달 샘플</button>
+
+    <!-- 리뷰 모달 샘플 -->
+    <div id="sample_review_modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="display:inline-block;">답변 리뷰</h3>
+                <button id="sample_review_tts" aria-label="TTS" style="background:none; border:none; cursor:pointer; font-size:24px; margin-left:10px; vertical-align:middle; color:rgb(250,145,43);">🔊</button>
+                <span class="close" onclick="document.getElementById('sample_review_modal').style.display='none'">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p><b>질문:</b> 왜 이렇게 말수가 줄었어?</p>
+                <p><b>답변:</b> 요즘 생각이 많아져서 그래</p>
+                <p><b>상세:</b> 너의 대답은 극도의 T야</p>
+                <p><b>실천팁:</b> 감정을 솔직하게 표현해보는 연습을 해보세요.</p>
+                <p><b>대안답변:</b> 가끔은 내 생각을 말로 표현하는 게 어려워.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button" onclick="document.getElementById('sample_review_modal').style.display='none'">닫기</button>
+            </div>
+        </div>
+    </div>
+    <!-- 알림 모달 -->
+    <div id="alert_modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>알림</h3>
+                <span class="close" onclick="hideAlertModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="alert_message"></p>
+            </div>
+            <div class="modal-footer">
+                <button onclick="hideAlertModal()" class="modal-button">확인</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // 홈으로 가기 함수
+    function goHome() {
+        window.location.href = '/';
+    }
+</script>
+</body>

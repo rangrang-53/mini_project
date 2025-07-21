@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI T/F 분석기 - 실시간 학습</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        .learning-panel {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .learning-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .status-indicator {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .learning-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .feedback-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        
+        .feedback-form {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .feedback-input {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .feedback-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .feedback-button:hover {
+            background: #218838;
+        }
+        
+        .learning-history {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #f1f3f4;
+            font-size: 12px;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .toggle-learning {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .toggle-learning:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MBTI T/F 분석기 - 실시간 학습</h1>
+            <p>사용자 데이터를 기반으로 지속적으로 개선되는 AI 분석기</p>
+        </header>
+
+        <!-- 실시간 학습 패널 -->
+        <div class="learning-panel">
+            <div class="learning-status">
+                <h3>실시간 학습 상태</h3>
+                <div>
+                    <span id="learningStatus" class="status-indicator status-active">활성화</span>
+                    <button id="toggleLearning" class="toggle-learning">학습 비활성화</button>
+                </div>
+            </div>
+            
+            <div class="learning-metrics">
+                <div class="metric-card">
+                    <div id="totalInputs" class="metric-value">0</div>
+                    <div class="metric-label">총 입력 수</div>
+                </div>
+                <div class="metric-card">
+                    <div id="acceptableRate" class="metric-value">0%</div>
+                    <div class="metric-label">허용 비율</div>
+                </div>
+                <div class="metric-card">
+                    <div id="averageError" class="metric-value">0%</div>
+                    <div class="metric-label">평균 오차</div>
+                </div>
+                <div class="metric-card">
+                    <div id="currentVersion" class="metric-value">v1.0</div>
+                    <div class="metric-label">현재 버전</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 기존 분석 인터페이스 -->
+        <div class="analysis-section">
+            <h2>MBTI T/F 성향 분석</h2>
+            <div class="input-group">
+                <textarea id="userInput" placeholder="분석할 답변을 입력하세요..." rows="4"></textarea>
+                <button id="analyzeBtn" onclick="analyzeText()">분석하기</button>
+            </div>
+            
+            <div id="result" class="result-section" style="display: none;">
+                <h3>분석 결과</h3>
+                <div id="scoreDisplay"></div>
+                <div id="analysisDisplay"></div>
+                
+                <!-- 학습 피드백 섹션 -->
+                <div class="feedback-section">
+                    <h4>학습 피드백</h4>
+                    <p>분석 결과가 정확한지 평가해주세요. 이를 통해 AI가 더 정확해집니다.</p>
+                    
+                    <div class="feedback-form">
+                        <label for="expectedScore">예상 T/F 점수 (0-100):</label>
+                        <input type="number" id="expectedScore" class="feedback-input" min="0" max="100" placeholder="예: 65">
+                        
+                        <label for="feedbackQuestion">질문 (선택사항):</label>
+                        <input type="text" id="feedbackQuestion" class="feedback-input" placeholder="예: 누군가 실수했을 때 당신의 첫마디는?">
+                        
+                        <button id="submitFeedback" class="feedback-button" onclick="submitFeedback()">피드백 제출</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 학습 히스토리 -->
+        <div class="learning-panel">
+            <h3>학습 히스토리</h3>
+            <div id="learningHistory" class="learning-history">
+                <p>아직 학습 데이터가 없습니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAnalysisResult = null;
+        let learningEnabled = true;
+
+        // 페이지 로드 시 학습 상태 업데이트
+        window.onload = function() {
+            updateLearningStatus();
+            loadLearningHistory();
+        };
+
+        async function analyzeText() {
+            const userInput = document.getElementById('userInput').value.trim();
+            if (!userInput) {
+                alert('분석할 텍스트를 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/v1/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: userInput })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayResult(result);
+                    currentAnalysisResult = result;
+                } else {
+                    alert('분석 중 오류가 발생했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('분석 중 오류가 발생했습니다.');
+            }
+        }
+
+        function displayResult(result) {
+            const resultDiv = document.getElementById('result');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const analysisDisplay = document.getElementById('analysisDisplay');
+
+            scoreDisplay.innerHTML = `
+                <div class="score-info">
+                    <h4>T/F 성향 점수: ${result.score}%</h4>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: ${result.score}%"></div>
+                    </div>
+                    <p>T 성향 ${100-result.score}% | F 성향 ${result.score}%</p>
+                </div>
+            `;
+
+            analysisDisplay.innerHTML = `
+                <div class="analysis-details">
+                    <h4>상세 분석</h4>
+                    <p>${result.detailed_analysis || '분석 내용이 없습니다.'}</p>
+                    
+                    ${result.reasoning ? `<h4>분석 근거</h4><p>${result.reasoning}</p>` : ''}
+                    
+                    ${result.suggestions && result.suggestions.length > 0 ? 
+                        `<h4>개선 제안</h4><ul>${result.suggestions.map(s => `<li>${s}</li>`).join('')}</ul>` : ''}
+                    
+                    ${result.alternative_response ? 
+                        `<h4>대안 답변</h4><p>${result.alternative_response}</p>` : ''}
+                </div>
+            `;
+
+            resultDiv.style.display = 'block';
+        }
+
+        async function submitFeedback() {
+            if (!currentAnalysisResult) {
+                alert('먼저 분석을 수행해주세요.');
+                return;
+            }
+
+            const expectedScore = document.getElementById('expectedScore').value;
+            const question = document.getElementById('feedbackQuestion').value || '사용자 입력';
+
+            if (!expectedScore) {
+                alert('예상 점수를 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/v1/learning/feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        answer: document.getElementById('userInput').value,
+                        expected_score: parseFloat(expectedScore),
+                        actual_score: currentAnalysisResult.score
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('피드백이 성공적으로 제출되었습니다. AI가 학습하여 더 정확해집니다.');
+                    updateLearningStatus();
+                    loadLearningHistory();
+                    
+                    // 입력 필드 초기화
+                    document.getElementById('expectedScore').value = '';
+                    document.getElementById('feedbackQuestion').value = '';
+                } else {
+                    alert('피드백 제출 중 오류가 발생했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('피드백 제출 중 오류가 발생했습니다.');
+            }
+        }
+
+        async function updateLearningStatus() {
+            try {
+                const response = await fetch('/api/v1/learning/status');
+                const status = await response.json();
+                
+                document.getElementById('totalInputs').textContent = status.total_inputs;
+                document.getElementById('acceptableRate').textContent = status.acceptable_rate.toFixed(1) + '%';
+                document.getElementById('averageError').textContent = status.average_error.toFixed(1) + '%';
+                document.getElementById('currentVersion').textContent = status.current_version;
+                
+                const statusIndicator = document.getElementById('learningStatus');
+                const toggleButton = document.getElementById('toggleLearning');
+                
+                if (status.enabled) {
+                    statusIndicator.textContent = '활성화';
+                    statusIndicator.className = 'status-indicator status-active';
+                    toggleButton.textContent = '학습 비활성화';
+                    learningEnabled = true;
+                } else {
+                    statusIndicator.textContent = '비활성화';
+                    statusIndicator.className = 'status-indicator status-inactive';
+                    toggleButton.textContent = '학습 활성화';
+                    learningEnabled = false;
+                }
+            } catch (error) {
+                console.error('Error updating learning status:', error);
+            }
+        }
+
+        async function toggleLearning() {
+            try {
+                const response = await fetch('/api/v1/learning/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ enabled: !learningEnabled })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    updateLearningStatus();
+                    alert(result.message);
+                } else {
+                    alert('학습 상태 변경 중 오류가 발생했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('학습 상태 변경 중 오류가 발생했습니다.');
+            }
+        }
+
+        async function loadLearningHistory() {
+            try {
+                const response = await fetch('/api/v1/learning/history');
+                const history = await response.json();
+                
+                const historyDiv = document.getElementById('learningHistory');
+                
+                if (history.total_count === 0) {
+                    historyDiv.innerHTML = '<p>아직 학습 데이터가 없습니다.</p>';
+                    return;
+                }
+                
+                let historyHtml = '';
+                history.history.forEach(item => {
+                    const status = item.is_acceptable ? '✅' : '❌';
+                    historyHtml += `
+                        <div class="history-item">
+                            <div><strong>${status} ${item.question}</strong></div>
+                            <div>답변: ${item.answer}</div>
+                            <div>예상: ${item.expected_score}% | 실제: ${item.actual_score}% | 오차: ${item.error.toFixed(1)}%</div>
+                            <div>버전: ${item.prompt_version} | 시간: ${item.timestamp}</div>
+                        </div>
+                    `;
+                });
+                
+                historyDiv.innerHTML = historyHtml;
+            } catch (error) {
+                console.error('Error loading learning history:', error);
+            }
+        }
+
+        // 이벤트 리스너 등록
+        document.getElementById('toggleLearning').addEventListener('click', toggleLearning);
+    </script>
+</body>
+</html> 

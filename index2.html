@@ -1,0 +1,2777 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MBTI T/F 분석기 - 질문</title>
+    <link rel="stylesheet" href="/static/common.css">
+    <style>
+        /* 모래시계 회전 애니메이션 추가 */
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .rotating-hourglass {
+            padding: 0 0 5px 0;
+            display: inline-block;
+            animation: rotate 2s linear infinite;
+            transform-origin: center center;
+        }
+        
+        /* 기존 스타일들... */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background: #f7f7f7;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: url('/static/images/Bg1.png'); /* 전체 배경 이미지 */
+            background-size: cover;
+            background-position: center;
+        }
+        
+        /* 홈 버튼 스타일 */
+        .home-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid #2196F3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .home-button:hover {
+            background-color: #2196F3;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+        .question-bar {
+            width: 100vw;
+            min-width: 100vw;
+            max-width: 100vw;
+            height: 150px;
+            margin: 0 auto 0 auto;
+            background: url('/static/images/textbar1.png') no-repeat center;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: #111;
+            text-align: center;
+            box-sizing: border-box;
+            border: none;
+            box-shadow: none;
+            background-color: transparent;
+            padding: 0;
+        }
+        .character-center {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 350px;
+            margin-bottom: 0;
+            padding-bottom: 0;
+            padding-top: 60px;
+        }
+        .character {
+            width: 360px;
+            height: 360px;
+            margin: 0 auto 1.5rem auto;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .face {
+            width: 360px;
+            height: 360px;
+            position: relative;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .face-very-angry {
+            background-image: url('/static/images/Very_angry.png');
+        }
+        .face-angry {
+            background-image: url('/static/images/Simple_angry.png');
+        }
+        .face-neutral {
+            background-image: url('/static/images/Base.png');
+        }
+        .face-happy {
+            background-image: url('/static/images/Simple_happy.png');
+        }
+        .face-very-happy {
+            background-image: url('/static/images/Very_happy.png');
+        }
+        #resultGraph {
+            margin-top: 1.5rem;
+            /* background-image: url('/static/images/report_bg.png'); */ /* 결과 리포트 박스 배경 - 파일 없음 */
+            background-size: cover;
+            background-position: center;
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+        .answer-bar {
+            width: 100%;
+            background: #fff;
+            border-top: 2px solid #2196F3;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            left: 0;
+            bottom: 80px; /* 하단에서 80px 위로 띄움 */
+            z-index: 10;
+            box-shadow: 0 -2px 8px rgba(33,150,243,0.07);
+            background-image: url('/static/images/textbar2.png'); /* 하단 입력 박스 배경 */
+            background-size: auto;
+            background-position: center;
+            height: auto;
+        }
+        .answer-input {
+            flex: 1 1 auto;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            margin-right: 1rem;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: row;
+            gap: 0.7rem;
+        }
+        .submit-button, .stt-button, .enhanced-stt-button {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .submit-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .submit-button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        .stt-button {
+            background-color: #E91E63;
+            color: white;
+        }
+        .stt-button:hover {
+            background-color: #C2185B;
+            transform: scale(1.05);
+        }
+        .enhanced-stt-button {
+            background-color: #FF9800;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.8rem 1.2rem;
+            min-width: 120px;
+            justify-content: center;
+            min-width: 50px;
+            padding: 0.8rem;
+        }
+        .enhanced-stt-button:hover {
+            background-color: #F57C00;
+            transform: scale(1.05);
+        }
+        .enhanced-stt-button.active {
+            background-color: #4CAF50;
+        }
+        .enhanced-stt-button.active:hover {
+            background-color: #45a049;
+        }
+
+        /* 반응형 디자인 - 모든 디바이스 최적화 */
+        
+        /* 모바일 최적화 */
+        @media (max-width: 768px) {
+            .character {
+                width: 280px;
+                height: 280px;
+            }
+            .face {
+                width: 280px;
+                height: 280px;
+            }
+            .question-bar {
+                height: 120px;
+                font-size: 1.1rem;
+                padding: 0 1rem;
+            }
+            .answer-input {
+                font-size: 1rem;
+                padding: 0.8rem;
+            }
+            .submit-button, .stt-button {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.9rem;
+            }
+            .home-button {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+        }
+        
+        /* 터치 디바이스 최적화 */
+        @media (hover: none) and (pointer: coarse) {
+            .submit-button, .stt-button {
+                min-height: 44px; /* iOS 권장 터치 영역 */
+            }
+            .answer-input {
+                min-height: 44px;
+            }
+        }
+        
+        /* 대형 데스크톱 (1200px 이상) */
+        @media (min-width: 1200px) {
+            .question-bar {
+                height: 180px;
+                font-size: 1.5rem;
+            }
+            .character {
+                width: 400px;
+                height: 400px;
+            }
+            .face {
+                width: 400px;
+                height: 400px;
+            }
+            .uibox-bg {
+                width: 900px;
+                min-height: 180px;
+            }
+            .uibox-input {
+                font-size: 1.3rem;
+                height: 70px;
+            }
+        }
+        
+        /* 중형 데스크톱 (992px - 1199px) */
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .question-bar {
+                height: 160px;
+                font-size: 1.4rem;
+            }
+            .character {
+                width: 380px;
+                height: 380px;
+            }
+            .face {
+                width: 380px;
+                height: 380px;
+            }
+            .uibox-bg {
+                width: 850px;
+                min-height: 160px;
+            }
+        }
+        
+        /* 소형 데스크톱 (768px - 991px) */
+        @media (min-width: 768px) and (max-width: 991px) {
+            .question-bar {
+                height: 150px;
+                font-size: 1.3rem;
+            }
+            .character {
+                width: 320px;
+                height: 320px;
+            }
+            .face {
+                width: 320px;
+                height: 320px;
+            }
+            .uibox-bg {
+                width: 700px;
+                min-height: 150px;
+                padding: 0 30px;
+            }
+            .uibox-input {
+                font-size: 1.1rem;
+                height: 60px;
+            }
+        }
+        
+        /* 태블릿 (576px - 767px) */
+        @media (min-width: 576px) and (max-width: 767px) {
+            .question-bar {
+                height: 140px;
+                font-size: 1.2rem;
+            }
+            .character {
+                width: 280px;
+                height: 280px;
+            }
+            .face {
+                width: 280px;
+                height: 280px;
+            }
+            .uibox-bg {
+                width: 90vw;
+                min-height: 140px;
+                padding: 0 25px;
+                gap: 20px;
+            }
+            .uibox-input {
+                font-size: 1rem;
+                height: 55px;
+                padding: 0 20px;
+            }
+            .submit-button .btn-img,
+            .stt-button .btn-img {
+                height: 40px;
+            }
+        }
+        
+        /* 모바일 (480px - 575px) */
+        @media (min-width: 480px) and (max-width: 575px) {
+            .question-bar {
+                height: 130px;
+                font-size: 1.1rem;
+            }
+            .character {
+                width: 240px;
+                height: 240px;
+            }
+            .face {
+                width: 240px;
+                height: 240px;
+            }
+            .uibox-bg {
+                width: 92vw;
+                min-height: 130px;
+                padding: 0 20px;
+                gap: 15px;
+                bottom: 30px;
+            }
+            .uibox-input {
+                font-size: 0.95rem;
+                height: 50px;
+                padding: 0 15px;
+            }
+            .submit-button .btn-img,
+            .stt-button .btn-img {
+                height: 35px;
+            }
+            .submit-button .btn-label {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* 소형 모바일 (320px - 479px) */
+        @media (min-width: 320px) and (max-width: 479px) {
+            .question-bar {
+                height: 120px;
+                font-size: 1rem;
+            }
+            .character {
+                width: 200px;
+                height: 200px;
+            }
+            .face {
+                width: 200px;
+                height: 200px;
+            }
+            .uibox-bg {
+                width: 94vw;
+                min-height: 120px;
+                padding: 0 15px;
+                gap: 12px;
+                bottom: 25px;
+            }
+            .uibox-input {
+                font-size: 0.9rem;
+                height: 45px;
+                padding: 0 12px;
+            }
+            .submit-button .btn-img,
+            .stt-button .btn-img {
+                height: 30px;
+            }
+            .submit-button .btn-label {
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* 초소형 모바일 (320px 미만) */
+        @media (max-width: 319px) {
+            .question-bar {
+                height: 110px;
+                font-size: 0.9rem;
+            }
+            .character {
+                width: 160px;
+                height: 160px;
+            }
+            .face {
+                width: 160px;
+                height: 160px;
+            }
+            .uibox-bg {
+                width: 96vw;
+                min-height: 110px;
+                padding: 0 10px;
+                gap: 10px;
+                bottom: 20px;
+            }
+            .uibox-input {
+                font-size: 0.85rem;
+                height: 40px;
+                padding: 0 10px;
+            }
+            .submit-button .btn-img,
+            .stt-button .btn-img {
+                height: 25px;
+            }
+            .submit-button .btn-label {
+                font-size: 0.75rem;
+            }
+        }
+        
+        /* 세로 화면 (높이가 너비보다 작은 경우) */
+        @media (orientation: portrait) {
+            .character-center {
+                min-height: 300px;
+                padding-top: 40px;
+            }
+        }
+        
+        /* 세로가 긴 화면 (iPhone 12 Pro 등) 최적화 */
+        @media (orientation: portrait) and (min-height: 800px) {
+            .question-bar {
+                height: 120px;
+                font-size: 1.1rem;
+            }
+            
+            .character-center {
+                min-height: 400px;
+                padding-top: 20px;
+                padding-bottom: 20px;
+            }
+            
+            .character {
+                width: 280px;
+                height: 280px;
+                margin: 0 auto 1rem auto;
+            }
+            
+            .face {
+                width: 280px;
+                height: 280px;
+            }
+            
+            .uibox-bg {
+                width: 90vw;
+                min-height: 120px;
+                padding: 0 20px;
+                gap: 15px;
+                bottom: 30px;
+            }
+            
+            .uibox-input {
+                font-size: 1rem;
+                height: 50px;
+                padding: 0 15px;
+            }
+            
+            .submit-button .btn-img,
+            .stt-button .btn-img {
+                height: 35px;
+            }
+            
+            .submit-button .btn-label {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* 매우 세로가 긴 화면 (iPhone 12 Pro Max 등) */
+        @media (orientation: portrait) and (min-height: 900px) {
+            .question-bar {
+                height: 130px;
+                font-size: 1.2rem;
+            }
+            
+            .character-center {
+                min-height: 450px;
+                padding-top: 30px;
+                padding-bottom: 30px;
+            }
+            
+            .character {
+                width: 320px;
+                height: 320px;
+                margin: 0 auto 1.5rem auto;
+            }
+            
+            .face {
+                width: 320px;
+                height: 320px;
+            }
+            
+            .uibox-bg {
+                width: 85vw;
+                min-height: 130px;
+                padding: 0 25px;
+                gap: 20px;
+                bottom: 40px;
+            }
+            
+            .uibox-input {
+                font-size: 1.1rem;
+                height: 55px;
+                padding: 0 20px;
+            }
+            
+            .submit-button .btn-img,
+            .stt-button .btn-img {
+                height: 40px;
+            }
+            
+            .submit-button .btn-label {
+                font-size: 1rem;
+            }
+        }
+        
+        /* iPhone 12 Pro 특정 최적화 (390x844) */
+        @media (width: 390px) and (height: 844px) {
+            .question-bar {
+                height: 110px;
+                font-size: 1rem;
+            }
+            
+            .character-center {
+                min-height: 350px;
+                padding-top: 15px;
+                padding-bottom: 15px;
+            }
+            
+            .character {
+                width: 240px;
+                height: 240px;
+                margin: 0 auto 0.8rem auto;
+            }
+            
+            .face {
+                width: 240px;
+                height: 240px;
+            }
+            
+            .uibox-bg {
+                width: 92vw;
+                min-height: 110px;
+                padding: 0 18px;
+                gap: 12px;
+                bottom: 25px;
+            }
+            
+            .uibox-input {
+                font-size: 0.95rem;
+                height: 48px;
+                padding: 0 15px;
+            }
+            
+            .submit-button .btn-img,
+            .stt-button .btn-img {
+                height: 32px;
+            }
+            
+            .submit-button .btn-label {
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* iPhone 12 Pro Max 특정 최적화 (428x926) */
+        @media (width: 428px) and (height: 926px) {
+            .question-bar {
+                height: 120px;
+                font-size: 1.1rem;
+            }
+            
+            .character-center {
+                min-height: 380px;
+                padding-top: 20px;
+                padding-bottom: 20px;
+            }
+            
+            .character {
+                width: 260px;
+                height: 260px;
+                margin: 0 auto 1rem auto;
+            }
+            
+            .face {
+                width: 260px;
+                height: 260px;
+            }
+            
+            .uibox-bg {
+                width: 90vw;
+                min-height: 120px;
+                padding: 0 20px;
+                gap: 15px;
+                bottom: 30px;
+            }
+            
+            .uibox-input {
+                font-size: 1rem;
+                height: 52px;
+                padding: 0 18px;
+            }
+            
+            .submit-button .btn-img,
+            .stt-button .btn-img {
+                height: 35px;
+            }
+            
+            .submit-button .btn-label {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* 가로 화면 (너비가 높이보다 큰 경우) */
+        @media (orientation: landscape) and (max-height: 600px) {
+            .question-bar {
+                height: 100px;
+                font-size: 1rem;
+            }
+            .character {
+                width: 180px;
+                height: 180px;
+            }
+            .face {
+                width: 180px;
+                height: 180px;
+            }
+            .uibox-bg {
+                min-height: 100px;
+                bottom: 15px;
+            }
+            .character-center {
+                min-height: 200px;
+                padding-top: 20px;
+            }
+        }
+        
+        /* 터치 디바이스 최적화 */
+        @media (hover: none) and (pointer: coarse) {
+            .submit-button,
+            .stt-button {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .uibox-input {
+                min-height: 44px;
+            }
+            
+
+        }
+        
+        /* iPhone 노치/홈 인디케이터 안전 영역 */
+        @supports (padding: max(0px)) {
+            .uibox-bg {
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+                bottom: max(20px, env(safe-area-inset-bottom));
+            }
+            
+            .question-bar {
+                padding-top: max(10px, env(safe-area-inset-top));
+            }
+        }
+        
+        /* 세로가 긴 화면에서 버튼이 짤리지 않도록 보장 */
+        @media (orientation: portrait) and (min-height: 800px) {
+            body {
+                min-height: 100vh;
+                min-height: 100dvh; /* 동적 뷰포트 높이 */
+            }
+            
+            .uibox-bg {
+                position: fixed;
+                bottom: max(20px, env(safe-area-inset-bottom, 20px));
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 1000;
+            }
+        }
+        
+        /* 고해상도 디스플레이 최적화 */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .uibox-input {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+        }
+    .textbar-container {
+        position: fixed;
+        left: 0;
+        bottom: 80px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none; /* 입력창만 클릭 가능하게 */
+        z-index: 20;
+        /* 내부 절대배치용 */
+        flex-direction: column;
+    }
+    .textbar-bg {
+        display: block;
+        max-width: 600px;
+        width: 100%;
+        height: auto;
+        pointer-events: none;
+    }
+    .answer-input-on-image {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: calc(100% - 120px); /* 좌우 여백 60px씩 */
+        max-width: 480px;
+        min-width: 180px;
+        padding: 0.8rem 1rem;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        background: rgba(255,255,255,0.85);
+        pointer-events: auto;
+        z-index: 2;
+        box-sizing: border-box;
+    }
+    .button-group-on-image {
+        position: absolute;
+        right: 30px;
+        bottom: 18px;
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+        pointer-events: auto;
+        z-index: 3;
+    }
+    .button-group-on-image .submit-button, .button-group-on-image .stt-button {
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        opacity: 0.95;
+    }
+    .button-group-on-image .submit-button {
+        background-color: #4CAF50;
+        color: white;
+    }
+    .button-group-on-image .submit-button:hover {
+        background-color: #45a049;
+        transform: scale(1.05);
+    }
+    .button-group-on-image .stt-button {
+        background-color: #E91E63;
+        color: white;
+    }
+    .button-group-on-image .stt-button:hover {
+        background-color: #C2185B;
+        transform: scale(1.05);
+    }
+    @media (max-width: 700px) {
+        .textbar-bg {
+            max-width: 98vw;
+        }
+        .answer-input-on-image {
+            width: 70vw;
+            max-width: 95vw;
+        }
+        .button-group-on-image {
+            right: 10px;
+            bottom: 10px;
+        }
+    }
+    .textbar-fixed-wrapper {
+        position: fixed;
+        left: 50%;
+        bottom: 40px;
+        transform: translateX(-50%);
+        width: 1212px;
+        height: 217px;
+        z-index: 20;
+        display: block;
+    }
+    .textbar-bg {
+        width: 1212px;
+        height: 217px;
+        display: block;
+    }
+    .answer-input-on-image {
+        position: absolute;
+        left: 60px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 800px;
+        height: 60px;
+        font-size: 1.3rem;
+        border: 2px solid #ddd;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.85);
+        z-index: 2;
+        box-sizing: border-box;
+        padding: 1rem 1.2rem;
+    }
+    .button-group-on-image {
+        position: absolute;
+        right: 60px;
+        bottom: 32px;
+        display: flex;
+        gap: 1rem;
+        z-index: 3;
+    }
+    .button-group-on-image .submit-button,
+    .button-group-on-image .stt-button {
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        opacity: 0.95;
+    }
+    .button-group-on-image .submit-button { background: #4CAF50; color: #fff; }
+    .button-group-on-image .submit-button:hover { background: #45a049; }
+    .button-group-on-image .stt-button { background: #E91E63; color: #fff; }
+    .button-group-on-image .stt-button:hover { background: #C2185B; }
+    .answer-image-bar-wrapper {
+        position: fixed;
+        left: 50%;
+        bottom: 40px;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        z-index: 20;
+    }
+    .answer-input-image-bg {
+        width: 600px;
+        height: 120px;
+        font-size: 1.3rem;
+        border: none;
+        border-radius: 0;
+                    background: url('/static/images/textbar2.png') no-repeat center/cover;
+        color: #222;
+        padding: 0 40px;
+        box-sizing: border-box;
+        outline: none;
+        /* placeholder 스타일 */
+    }
+    .answer-input-image-bg::placeholder {
+        color: #888;
+        font-size: 1.2rem;
+        opacity: 1;
+    }
+    .button-group-inline {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        margin-left: 20px;
+    }
+    .button-group-inline .submit-button,
+    .button-group-inline .stt-button {
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        opacity: 0.95;
+    }
+    .button-group-inline .submit-button { background: #4CAF50; color: #fff; }
+    .button-group-inline .submit-button:hover { background: #45a049; }
+    .button-group-inline .stt-button { background: #E91E63; color: #fff; }
+    .button-group-inline .stt-button:hover { background: #C2185B; }
+    .detail-btn {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    .detail-btn-img {
+        width: 40px;
+        height: auto;
+        display: block;
+    }
+    .detail-modal-content {
+                    background: url('/static/images/note.png') no-repeat center center !important;
+        background-size: cover !important;
+        border-radius: 16px;
+        max-width: 600px;
+        max-height: 80vh;
+        margin: 50px auto;
+        padding: 1.2em;
+        box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+        position: relative;
+        font-size: 0.95em;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    .main-result-text {
+        color: rgb(254,157,41);
+        font-size: 1.2em;
+        font-weight: bold;
+        text-shadow: 1.5px 1.5px 0 rgb(0, 0, 0);
+    }
+    
+    /* 리뷰 모달 스타일 개선 */
+    .modal-content {
+        background: white;
+        border-radius: 16px;
+        max-width: 500px;
+        margin: 60px auto;
+        padding: 2em;
+        box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+        position: relative;
+        font-size: 0.95em;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    .review-section h3 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-family: 'HeirofBold';
+    }
+    
+    .review-section h4 {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        font-family: 'HeirofBold';
+        font-size: 1.1em;
+    }
+    
+    .review-section p {
+        line-height: 1.6;
+        margin-bottom: 0.5rem;
+        font-family: 'HeirofLight';
+    }
+    
+    .review-section strong {
+        color: #2c3e50;
+        font-family: 'HeirofBold';
+    }
+    
+    /* 요약 섹션 스타일 */
+    .summary-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 0.8rem;
+        margin-bottom: 0.5rem;
+        border-left: 4px solid #007bff;
+        font-size: 0.95em;
+    }
+    
+    .summary-section p {
+        margin: 0;
+        color: #495057;
+        line-height: 1.4;
+    }
+    
+    .summary-section strong {
+        color: #2c3e50;
+        font-weight: bold;
+    }
+    
+    /* 상세 내용 토글 버튼 */
+    .toggle-detail-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-family: 'HeirofLight';
+        transition: background-color 0.3s;
+    }
+    
+    .toggle-detail-btn:hover {
+        background: #0056b3;
+    }
+    
+    /* AI 요약 관련 스타일 */
+    .rotating-hourglass {
+        font-size: 2em;
+        animation: rotate 1s linear infinite;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .ai-summary-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .ai-summary-box h4 {
+        margin: 0 0 0.5rem 0;
+        color: white;
+    }
+    
+    .summary-item {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.8rem;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+        border-left: 4px solid rgba(255, 255, 255, 0.5);
+    }
+    
+    /* 모바일 환경에서 리뷰 모달 최적화 */
+    @media (max-width: 768px) {
+        .modal-content {
+            max-width: 95vw;
+            margin: 20px auto;
+            padding: 1.5em;
+            max-height: 85vh;
+        }
+        
+        .detail-modal-content {
+            max-width: 95vw;
+            max-height: 85vh;
+            margin: 20px auto;
+            padding: 1.5em;
+        }
+        
+        .review-section h3 {
+            font-size: 1.2em;
+        }
+        
+        .review-section h4 {
+            font-size: 1em;
+        }
+        
+        .summary-section {
+            padding: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .toggle-detail-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .modal-content {
+            max-width: 98vw;
+            margin: 10px auto;
+            padding: 1em;
+        }
+        
+        .detail-modal-content {
+            max-width: 98vw;
+            max-height: 90vh;
+            margin: 10px auto;
+            padding: 1em;
+        }
+        
+        .review-section h3 {
+            font-size: 1.1em;
+        }
+        
+        .summary-section {
+            padding: 0.6rem;
+        }
+        
+        .toggle-detail-btn {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.75rem;
+        }
+    }
+    </style>
+</head>
+<body>
+    <!-- 홈 버튼 -->
+    <div class="home-button" onclick="goHome()" title="홈으로 가기">🏠</div>
+    
+    <div class="question-bar" id="questionBar">
+        <div id="question">질문을 불러오는 중...</div>
+    </div>
+    <div class="character-center">
+        <div class="character">
+            <div class="face face-neutral" id="characterFace"></div>
+        </div>
+        <div id="resultGraph" style="display: none;"></div>
+    </div>
+    <!-- 이미지 UI박스 안에 입력창, 제출, 음성 버튼 -->
+    <div class="uibox-bg">
+        <input type="text" class="uibox-input" id="answerInput" placeholder="답변을 입력하세요...">
+        <button class="submit-button" id="submitButton" onclick="submitAnswer()">
+                                <img src="/static/images/button2.png" alt="제출" class="btn-img">
+            <span class="btn-label">제출</span>
+        </button>
+        <button class="stt-button" id="sttButton" onclick="startSTT()">
+            <img src="/static/images/mic.png" alt="음성 입력" class="btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <span class="mic-fallback" style="display:none; color:#fff; font-size:1.2rem; font-weight:bold;">🎤</span>
+        </button>
+        <!-- 향상된 STT 토글 버튼 주석처리
+        <button class="enhanced-stt-button" id="enhancedSTTButton" onclick="toggleEnhancedSTT()" title="향상된 STT 기능 토글">
+            <span id="enhancedSTTIcon">🔧</span>
+            <span id="enhancedSTTLabel">기본</span>
+        </button>
+        -->
+    </div>
+
+    <style>
+    #question{
+        font-family: 'HeirofBold';
+    }
+    #answerInput, .btn-label{
+        font-family: 'HeirofLight';
+    }
+    
+    #answerInput::placeholder {
+        font-family: 'HeirofLight';
+    }
+
+    .uibox-bg {
+        width: 800px;
+        min-height: 150px;
+        height: auto;
+        max-width: 90vw;
+                    background: url('/static/images/textbar2.png') no-repeat center/contain;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        z-index: 20;
+        box-sizing: border-box;
+        padding: 0 40px;
+        overflow: visible;
+        position: fixed;
+        left: 50%;
+        bottom: 40px;
+        transform: translateX(-50%);
+    }
+
+    /* 모바일 환경 대응 */
+    @media (max-width: 768px) {
+        .uibox-bg {
+            width: 95vw;
+            max-width: 95vw;
+            padding: 0 20px;
+            gap: 12px;
+            bottom: 20px;
+        }
+        
+        .uibox-input {
+            font-size: 1rem;
+            padding: 0 12px;
+        }
+        
+        .submit-button .btn-img,
+        .stt-button .btn-img {
+            height: 36px;
+            width: 36px;
+        }
+        
+        .submit-button .btn-label {
+            font-size: 0.9rem;
+        }
+
+        /* 모바일에서 마이크 버튼을 오른쪽 상단으로 이동 */
+        .stt-button {
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            bottom: auto !important;
+            left: auto !important;
+            transform: none !important;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7) !important;
+            border-radius: 50% !important;
+            width: 50px !important;
+            height: 50px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        }
+
+        /* 모바일에서 향상된 STT 버튼 스타일 */
+        .enhanced-stt-button {
+            min-width: 100px !important;
+            font-size: 0.9rem !important;
+            padding: 0.6rem 1rem !important;
+        }
+
+        .stt-button .btn-img {
+            height: 24px !important;
+            width: 24px !important;
+        }
+
+        .mic-fallback {
+            font-size: 1.2rem !important;
+            color: #fff !important;
+        }
+    }
+
+    /* 매우 작은 화면 대응 */
+    @media (max-width: 480px) {
+        .uibox-bg {
+            width: 98vw;
+            max-width: 98vw;
+            padding: 0 10px;
+            gap: 8px;
+            bottom: 10px;
+        }
+        
+        .uibox-input {
+            font-size: 0.9rem;
+            padding: 0 8px;
+        }
+        
+        .submit-button .btn-img {
+            height: 32px;
+            width: 32px;
+        }
+        
+        .submit-button .btn-label {
+            font-size: 0.8rem;
+        }
+
+        /* 작은 화면에서 마이크 버튼 크기 조정 */
+        .stt-button {
+            width: 45px !important;
+            height: 45px !important;
+            top: 15px !important;
+            right: 15px !important;
+        }
+
+        .stt-button .btn-img {
+            height: 20px !important;
+            width: 20px !important;
+        }
+
+        .mic-fallback {
+            font-size: 1rem !important;
+        }
+    }
+    .result-content {
+        width: 100%;
+        text-align: center;
+        padding: 1.2rem 0.5rem;
+        box-sizing: border-box;
+        overflow-x: auto;
+        word-break: break-all;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .uibox-input {
+        flex: 1 1 0;
+        height: 60px;
+        font-size: 1.2rem;
+        border: none;
+        background: transparent !important;
+        color: #fff;
+        padding: 0 24px;
+        outline: none;
+    }
+    .uibox-input::placeholder {
+        color: #888;
+        font-size: 1.1rem;
+        opacity: 1;
+    }
+    
+    /* 자동완성 선택 시 입력창 배경색 고정 */
+    .uibox-input:-webkit-autofill,
+    .uibox-input:-webkit-autofill:hover,
+    .uibox-input:-webkit-autofill:focus,
+    .uibox-input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px transparent inset !important;
+        -webkit-text-fill-color: #fff !important;
+        background-color: transparent !important;
+        transition: background-color 5000s ease-in-out 0s;
+        color: #fff !important;
+    }
+    
+    /* 자동완성 후 텍스트 색상 강제 고정 */
+    .uibox-input:-webkit-autofill {
+        -webkit-text-fill-color: #fff !important;
+        color: #fff !important;
+    }
+    
+    /* 자동완성 후 포커스 시에도 흰색 유지 */
+    .uibox-input:-webkit-autofill:focus {
+        -webkit-text-fill-color: #fff !important;
+        color: #fff !important;
+    }
+    
+    /* 자동완성 후 호버 시에도 흰색 유지 */
+    .uibox-input:-webkit-autofill:hover {
+        -webkit-text-fill-color: #fff !important;
+        color: #fff !important;
+    }
+    
+    /* 자동완성 드롭다운 글씨 크기 고정 */
+    .uibox-input::-webkit-list-button {
+        font-size: 1.2rem !important;
+    }
+    
+    /* 자동완성 드롭다운 옵션 글씨 크기 고정 */
+    .uibox-input::-webkit-calendar-picker-indicator {
+        font-size: 1.2rem !important;
+    }
+    
+    /* 자동완성 드롭다운 텍스트 크기 고정 */
+    .uibox-input::-webkit-datetime-edit-text {
+        font-size: 1.2rem !important;
+    }
+    
+    /* 자동완성 드롭다운 필드 글씨 크기 고정 */
+    .uibox-input::-webkit-datetime-edit-month-field,
+    .uibox-input::-webkit-datetime-edit-day-field,
+    .uibox-input::-webkit-datetime-edit-year-field {
+        font-size: 1.2rem !important;
+    }
+    
+    /* 자동완성 드롭다운 호버 시 글씨 크기 유지 */
+    .uibox-input::-webkit-list-button:hover,
+    .uibox-input::-webkit-calendar-picker-indicator:hover,
+    .uibox-input::-webkit-datetime-edit-text:hover,
+    .uibox-input::-webkit-datetime-edit-month-field:hover,
+    .uibox-input::-webkit-datetime-edit-day-field:hover,
+    .uibox-input::-webkit-datetime-edit-year-field:hover {
+        font-size: 1.2rem !important;
+        transform: none !important;
+        scale: 1 !important;
+    }
+    
+    /* 자동완성 드롭다운 전체 글씨 크기 강제 고정 */
+    .uibox-input::-webkit-autofill,
+    .uibox-input::-webkit-autofill:hover,
+    .uibox-input::-webkit-autofill:focus,
+    .uibox-input::-webkit-autofill:active {
+        font-size: 1.2rem !important;
+        font-weight: normal !important;
+        letter-spacing: normal !important;
+        line-height: normal !important;
+    }
+    
+    /* 자동완성 드롭다운 모든 요소 글씨 크기 고정 */
+    .uibox-input::-webkit-any-link,
+    .uibox-input::-webkit-any-link:hover,
+    .uibox-input::-webkit-any-link:active,
+    .uibox-input::-webkit-any-link:visited {
+        font-size: 1.2rem !important;
+        text-decoration: none !important;
+    }
+    
+    /* 자동완성 드롭다운 선택된 항목 글씨 크기 고정 */
+    .uibox-input::-webkit-list-button:active,
+    .uibox-input::-webkit-calendar-picker-indicator:active,
+    .uibox-input::-webkit-datetime-edit-text:active,
+    .uibox-input::-webkit-datetime-edit-month-field:active,
+    .uibox-input::-webkit-datetime-edit-day-field:active,
+    .uibox-input::-webkit-datetime-edit-year-field:active {
+        font-size: 1.2rem !important;
+        transform: none !important;
+        scale: 1 !important;
+    }
+    .submit-button .btn-img,
+    .stt-button .btn-img {
+        height: 48px;
+        width: auto;
+        display: block;
+        object-fit: contain;
+    }
+    .submit-button {
+        position: relative;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+    .submit-button .btn-label {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: bold;
+        pointer-events: none;
+        /* text-shadow: 0 1px 4px #000, 0 0 2px #000; */
+        white-space: nowrap;
+    }
+    .stt-button {
+        background: none !important;
+        border: none;
+        min-width: 48px;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    /* 모바일 환경 대응 */
+    @media (max-width: 768px) {
+        .stt-button {
+            min-width: 48px;
+            min-height: 48px;
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .stt-button .btn-img {
+            height: 28px;
+            width: 28px;
+        }
+        
+        .mic-fallback {
+            font-size: 1.2rem !important;
+        }
+    }
+
+    /* 매우 작은 화면 대응 */
+    @media (max-width: 480px) {
+        .stt-button {
+            min-width: 40px;
+            min-height: 40px;
+        }
+        
+        .stt-button .btn-img {
+            height: 24px;
+            width: 24px;
+        }
+        
+        .mic-fallback {
+            font-size: 1rem !important;
+        }
+    }
+
+    /* STT 모달 스타일 */
+    .stt-modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+    }
+
+    .stt-modal-content h3 {
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    .stt-modal-content button {
+        transition: background-color 0.3s;
+    }
+
+    .stt-modal-content button:hover {
+        background-color: #c82333 !important;
+    }
+    .detail-btn {
+        position: absolute;
+        right: -60px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .detail-btn-img {
+        width: 40px;
+        height: auto;
+        display: block;
+    }
+    .next-btn {
+        position: static;
+        margin-top: 0.7em;
+        margin-bottom: 0;
+        margin-right: calc(50vw - 400px);
+        margin-left: auto;
+        padding: 0.8em 2.5em;
+        font-size: 1.1em;
+        border-radius: 8px;
+        border: none;
+        background: #2196F3;
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: block;
+        font-family: 'HeirofBold';
+    }
+    .next-btn:hover {
+        background: #1976D2;
+    }
+    /* 모바일 최적화 스타일 */
+    @media (max-width: 768px) {
+        .stt-modal {
+            padding: 1rem;
+            margin: 1rem;
+            border-radius: 12px;
+        }
+        
+        .stt-modal h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stt-modal p {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .stt-modal button {
+            padding: 0.8rem 1.2rem;
+            font-size: 1rem;
+            margin: 0.5rem;
+            min-width: 120px;
+        }
+        
+        .stt-modal .button-group {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .stt-modal .button-group button {
+            width: 100%;
+            max-width: 200px;
+        }
+    }
+    </style>
+    
+    <!-- 기존 하단 메시지 삭제 및 모달 추가 -->
+    <!-- <div id="loadingMessage" style="display:none; color:#2196F3; font-weight:bold; margin-top:1rem;">
+        <span id="loadingText" style="font-family: 'HeirofLight';">AI가 분석중입니다</span><span id="loadingDots"></span>
+    </div> -->
+    <div id="loadingModal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35); z-index:20000; align-items:center; justify-content:center;">
+      <div style="background:white; border-radius:18px; box-shadow:0 4px 32px rgba(0,0,0,0.18); padding:2.5em 2em; min-width:220px; display:flex; flex-direction:column; align-items:center;">
+        <div style="font-size:1.3em; color:#7C3AED; font-family:'HeirofBold'; margin-bottom:1em;"><span class="rotating-hourglass">⏳</span> AI가 분석중입니다...</div>
+        <div id="loadingDots" style="font-size:2em; color:#7C3AED; letter-spacing:0.2em; margin-bottom:1.5em;">...</div>
+        <button id="cancelAnalysisBtn" onclick="cancelAnalysis()" style="background:#ff4757; color:white; border:none; padding:0.8em 1.5em; border-radius:8px; font-size:1rem; cursor:pointer; font-family:'HeirofLight'; transition:all 0.3s ease;">
+          ❌ 분석 취소
+        </button>
+      </div>
+    </div>
+
+
+    <script>
+        // API 기본 URL 설정 - ngrok 호환
+        const API_BASE_URL = window.location.origin;
+        // 임시 기본 질문 데이터
+        const DEFAULT_QUESTIONS = [
+            '당신이 최근에 내린 가장 큰 결정은 무엇인가요?',
+            '친구가 고민을 털어놓을 때 당신의 첫 반응은?',
+            '문제가 생겼을 때 어떻게 해결하려고 하나요?',
+            '감정이 격해질 때 주로 어떻게 대처하나요?',
+            '중요한 선택을 할 때 무엇을 가장 우선시하나요?'
+        ];
+        // 전역 변수
+        let currentCount = 0;
+        let maxCount = 0;
+        let results = [];
+        let usedQuestions = new Set();
+        let questions = [];
+        // 전역 변수 추가
+        let lastResultData = null;
+
+        // API 서버 상태 체크 함수 (모바일 최적화)
+        async function checkApiServer(retryCount = 3) {
+            for (let i = 0; i < retryCount; i++) {
+                try {
+                    console.log(`API 서버 상태 체크 시도 ${i + 1}/${retryCount}`);
+                    
+                    // 모바일에서 더 긴 타임아웃 설정
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10초 타임아웃
+                    
+                    const res = await fetch(`${API_BASE_URL}/questions?use_ai=false`, { 
+                        method: 'GET',
+                        signal: controller.signal,
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (res.ok) {
+                        console.log('API 서버 연결 성공');
+                        return true;
+                    }
+                } catch (e) {
+                    console.log(`API 서버 체크 실패 (시도 ${i + 1}):`, e);
+                    if (i < retryCount - 1) {
+                        // 재시도 전 잠시 대기 (모바일에서는 더 긴 대기)
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    }
+                }
+            }
+            console.log('API 서버 연결 실패 - 모든 재시도 완료');
+            return false;
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', async function() {
+            // URL 파라미터에서 설정 가져오기
+            const urlParams = new URLSearchParams(window.location.search);
+            const count = parseInt(urlParams.get('count')) || 5;
+            const source = urlParams.get('source') || 'default';
+            
+            let settings = {
+                count: count,
+                source: source,
+                questionCount: count,
+                questionSource: source
+            };
+            
+            console.log('URL 파라미터에서 설정 로드:', settings);
+            console.log('질문 소스:', source);
+            console.log('설정된 questionSource:', settings.questionSource);
+            console.log('=== 디버그 정보 ===');
+            console.log('URL 전체:', window.location.href);
+            console.log('URL 파라미터:', window.location.search);
+            console.log('source 파라미터:', urlParams.get('source'));
+            console.log('count 파라미터:', urlParams.get('count'));
+            console.log('==================');
+            
+            // API 서버 상태 먼저 확인 (재시도 포함)
+            const apiAlive = await checkApiServer();
+            if (!apiAlive) {
+                console.log('API 서버 연결 실패 - 기본 질문으로 진행');
+                alert('질문 서버(API)에 연결할 수 없습니다. 기본 질문으로 진행합니다.\n\n서버가 실행 중이라면 페이지를 새로고침해보세요.');
+                maxCount = DEFAULT_QUESTIONS.length;
+                questions = [...DEFAULT_QUESTIONS];
+                currentCount = 0; // 카운트 초기화 추가
+                initCharacter();
+                showNextQuestion();
+                return;
+            }
+            
+            maxCount = count;
+            currentCount = 0; // 카운트 초기화 추가
+            console.log('설정된 질문 수:', maxCount); // 디버깅 로그 추가
+            initCharacter();
+            loadQuestions(settings);
+        });
+
+        // 질문 데이터 로드 (매번 새로운 질문 생성)
+        async function loadQuestions(settings) {
+            try {
+                const count = settings.questionCount || 5;
+                const questionSource = settings.questionSource || 'default';
+                console.log('질문 로드 요청 - 개수:', count, ', 소스:', questionSource); // 디버깅 로그 추가
+                
+                let url;
+                if (questionSource === 'question2') {
+                    // question2.json 로드 (구어체 질문 + 인터넷 밈)
+                    url = `${API_BASE_URL}/question/question2.json`;
+                } else if (questionSource === 'ai') {
+                    // AI 질문 생성
+                    url = `${API_BASE_URL}/api/v1/questions?use_ai=true`;
+                } else {
+                    // 기본 question2.json 로드 (fallback)
+                    url = `${API_BASE_URL}/question/question2.json`;
+                }
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('API 응답 오류');
+                const data = await response.json();
+                if (!data.questions || !Array.isArray(data.questions) || data.questions.length === 0) {
+                    throw new Error('질문 데이터 없음');
+                }
+                
+                // Fisher-Yates 셔플 알고리즘으로 질문들을 셔플
+                const shuffled = [...data.questions];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                
+                questions = shuffled;
+                // maxCount는 메인에서 설정한 count 값으로 유지 (API 질문 수로 덮어쓰지 않음)
+                console.log('질문 로드 및 셔플 완료 - 개수:', questions.length, ', 설정된 maxCount:', maxCount, ', 소스:', questionSource); // 디버깅 로그 추가
+                showNextQuestion();
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                // 실패 시 기본 질문 사용
+                questions = [...DEFAULT_QUESTIONS];
+                // maxCount는 메인에서 설정한 count 값으로 유지
+                console.log('기본 질문 사용 - 개수:', questions.length, ', 설정된 maxCount:', maxCount); // 디버깅 로그 추가
+                showNextQuestion();
+            }
+        }
+
+        // 캐릭터 초기화
+        function initCharacter() {
+            const character = document.getElementById('characterFace');
+            if (character) {
+                character.className = 'face face-neutral';
+            }
+            document.querySelector('.character-center').style.paddingTop = '100px';
+        }
+
+        // 표정 변경
+        function updateCharacterExpression(score) {
+            const face = document.getElementById('characterFace');
+            if (face) {
+                face.className = 'face';
+                if (score < 20) face.classList.add('face-very-angry');
+                else if (score < 40) face.classList.add('face-angry');
+                else if (score < 60) face.classList.add('face-neutral');
+                else if (score < 80) face.classList.add('face-happy');
+                else face.classList.add('face-very-happy');
+            }
+            document.querySelector('.character-center').style.paddingTop = '60px';
+        }
+
+        // 랜덤 질문 선택
+        function getRandomQuestion() {
+            const availableQuestions = questions.filter((_, index) => !usedQuestions.has(index));
+            if (availableQuestions.length === 0) {
+                usedQuestions.clear();
+                return questions[Math.floor(Math.random() * questions.length)];
+            }
+            const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+            const questionIndex = questions.findIndex(q => q === availableQuestions[randomIndex]);
+            usedQuestions.add(questionIndex);
+            return availableQuestions[randomIndex];
+        }
+
+        // 다음 질문 표시
+        function showNextQuestion() {
+            document.querySelector('.character-center').style.paddingTop = '100px';
+            // 셔플된 질문 배열에서 순차적으로 선택
+            const question = questions[currentCount];
+            document.getElementById('question').textContent = question;
+            document.getElementById('answerInput').value = '';
+            document.getElementById('answerInput').disabled = false;
+            document.getElementById('resultGraph').style.display = 'none';
+            document.querySelector('.submit-button').disabled = false;
+            document.querySelector('.submit-button').style.opacity = '1';
+        }
+
+        // 전역 변수로 현재 분석 요청의 AbortController 저장
+        let currentAnalysisController = null;
+
+        // 분석 취소 함수
+        function cancelAnalysis() {
+            if (currentAnalysisController) {
+                currentAnalysisController.abort();
+                currentAnalysisController = null;
+            }
+            hideLoadingModal();
+            console.log('분석이 취소되었습니다.');
+        }
+
+        // 답변 제출 (모바일 최적화)
+        async function submitAnswer() {
+            const answer = document.getElementById('answerInput').value.trim();
+            if (!answer) {
+                alert('답변을 입력해주세요.');
+                return;
+            }
+
+            showLoadingModal();
+
+            try {
+                // 모바일에서 더 긴 타임아웃 설정
+                currentAnalysisController = new AbortController();
+                const timeoutId = setTimeout(() => currentAnalysisController.abort(), 15000); // 15초 타임아웃
+                
+                const response = await fetch(`${API_BASE_URL}/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ text: answer }),
+                    signal: currentAnalysisController.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`API 호출 실패: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // 데이터 유효성 검사
+                if (!data || typeof data.score === 'undefined') {
+                    throw new Error('API 응답 데이터가 올바르지 않습니다.');
+                }
+                
+                results.push({
+                    question: document.getElementById('question').textContent,
+                    answer: answer,
+                    score: data.score,
+                    detailed_analysis: data.detailed_analysis,
+                    reasoning: data.reasoning,
+                    suggestions: data.suggestions,
+                    alternative_response: data.alternative_response
+                });
+                lastResultData = data; // 전역 변수에 저장
+                currentAnalysisController = null; // 컨트롤러 초기화
+                hideLoadingModal();
+                showResult(data); // tfScore가 아니라 data 전체를 넘김
+            } catch (error) {
+                console.error('Error:', error);
+                
+                // 취소된 경우 오류 메시지 표시하지 않음
+                if (error.name === 'AbortError' && !currentAnalysisController) {
+                    console.log('분석이 사용자에 의해 취소되었습니다.');
+                    return;
+                }
+                
+                // 모바일에서 더 친화적인 오류 메시지
+                let errorMessage = '분석 중 오류가 발생했습니다.';
+                if (error.name === 'AbortError') {
+                    errorMessage = '요청 시간이 초과되었습니다. 네트워크 상태를 확인하고 다시 시도해주세요.';
+                } else if (error.message.includes('Failed to fetch')) {
+                    errorMessage = '서버에 연결할 수 없습니다. 인터넷 연결을 확인해주세요.';
+                }
+                
+                alert(errorMessage);
+                currentAnalysisController = null; // 컨트롤러 초기화
+                hideLoadingModal();
+            }
+        }
+
+        // showResult 함수 수정
+        function showResult(data) {
+            let tfScore = Number(data.score);
+            if (isNaN(tfScore)) {
+                alert('분석 결과 점수가 올바르지 않습니다. 기본값으로 표시합니다.');
+                tfScore = 50;
+            }
+            // 분석 끝났으니 로딩 메시지 숨김
+            document.getElementById('loadingModal').style.display = 'none';
+            // 점수에 따라 캐릭터 표정 업데이트
+            updateCharacterExpression(tfScore);
+            const uibox = document.querySelector('.uibox-bg');
+            const tPercentage = 100 - tfScore;
+            const fPercentage = tfScore;
+            let resultText = '';
+            if (tfScore < 20) resultText = `당신은 확실한 T입니다! "너 T발C야?" (T: ${tPercentage}% / F: ${fPercentage}%)`;
+            else if (tfScore <= 40) resultText = `당신은 T 성향이 강합니다. (T: ${tPercentage}% / F: ${fPercentage}%)`;
+            else if (tfScore >= 41 && tfScore <= 59) resultText = `당신은 T와 F의 균형이 잘 잡혀있습니다. (T: ${tPercentage}% / F: ${fPercentage}%)`;
+            else if (tfScore < 80) resultText = `당신은 F 성향이 강합니다. (T: ${tPercentage}% / F: ${fPercentage}%)`;
+            else resultText = `당신은 확실한 F입니다! "너 F구나?" (T: ${tPercentage}% / F: ${fPercentage}%)`;
+            uibox.innerHTML = `
+                <div class="result-content">
+                    <p class="main-result-text" style="font-family: 'HeirofBold';">${resultText}</p>
+                    <div style="position: relative; width: 80%; margin: 1.2rem auto;">
+                        <div style="width: 100%; height: 24px; background: linear-gradient(to right, #ff4444, #ffff44, #44ff44); border-radius: 12px; position: relative;">
+                            <div style="position: absolute; left: ${tfScore}%; top: 20px; transform: translateX(-50%); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: clamp(4px, 1vw, 6px) clamp(6px, 2vw, 10px); border-radius: clamp(6px, 1.5vw, 8px); font-size: clamp(0.7em, 2.5vw, 0.9em); font-weight: bold; white-space: nowrap; box-shadow: 0 3px 8px rgba(0,0,0,0.3); border: clamp(1px, 0.3vw, 2px) solid #fff;">
+                                ${tfScore.toFixed(1)}점
+                            </div>
+                            <div style="width: clamp(8px, 2vw, 12px); height: clamp(30px, 8vw, 40px); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: clamp(2px, 0.5vw, 3px) solid #fff; border-radius: clamp(4px, 1vw, 6px); position: absolute; left: ${tfScore}%; top: -9px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); transform: translateX(-50%); display: flex; align-items: center; justify-content: center; font-size: clamp(20px, 5vw, 32px); color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+                                ${tfScore < 30 ? '😤' : tfScore < 50 ? '😐' : tfScore < 70 ? '😊' : '😄'}
+                            </div>
+                            <div style="position: absolute; left: 5px; top: 50%; transform: translateY(-50%); color: white; font-size: 0.8em; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.7);">
+                                Thinking
+                            </div>
+                            <div style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); color: white; font-size: 0.8em; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.7);">
+                                Feeling
+                            </div>
+                        </div>
+                    </div>
+                    <button class="detail-btn" onclick="showDetailAnalysis()">
+                        <img src="/static/Question_pg/note_button.png" alt="상세 분석 보기" class="detail-btn-img">
+                    </button>
+                </div>
+            `;
+            // '다음' 또는 '결과' 버튼을 .uibox-bg(박스) 밖 note_button 아래에 오른쪽 정렬로 추가
+            let nextBtn = document.querySelector('.next-btn');
+            if (!nextBtn) {
+                nextBtn = document.createElement('button');
+                nextBtn.className = 'next-btn';
+                document.querySelector('.uibox-bg').after(nextBtn);
+            }
+            // 버튼 텍스트 및 동작 설정
+            console.log('현재 질문:', currentCount + 1, '/', maxCount); // 디버깅 로그 추가
+            if (currentCount + 1 >= maxCount) {
+                nextBtn.textContent = '결과';
+                nextBtn.onclick = goToResultPage;
+                console.log('결과 버튼 표시'); // 디버깅 로그 추가
+            } else {
+                nextBtn.textContent = '다음';
+                nextBtn.onclick = nextQuestion;
+                console.log('다음 버튼 표시'); // 디버깅 로그 추가
+            }
+            nextBtn.style.display = 'block';
+        }
+
+        // 다음 질문으로 이동 (새로운 질문 생성)
+        async function nextQuestion() {
+            currentCount++;
+            console.log('다음 질문으로 이동 - 현재 카운트:', currentCount, '/', maxCount); // 디버깅 로그 추가
+            
+            // 새로운 질문 생성
+            if (currentCount < maxCount) {
+                try {
+                    console.log('새로운 질문 생성 요청...');
+                    const url = `${API_BASE_URL}/api/v1/questions?use_ai=false`;
+                    
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('API 응답 오류');
+                    const data = await response.json();
+                    
+                    if (data.questions && Array.isArray(data.questions) && data.questions.length > 0) {
+                        // 새로운 질문으로 현재 질문 교체
+                        questions[currentCount] = data.questions[0];
+                        console.log('새로운 질문 생성 완료:', data.questions[0]);
+                    } else {
+                        throw new Error('새로운 질문 데이터 없음');
+                    }
+                } catch (error) {
+                    console.error('새로운 질문 생성 실패:', error);
+                    // 실패 시 기존 질문 유지
+                }
+            }
+            
+            // 결과창/버튼 숨기고, 입력창/질문/캐릭터 등 초기화
+            // 입력창, 질문, 캐릭터 등 index2의 기본 UI로 복구
+            // uibox-bg를 원래 입력창 UI로 복원
+            const uibox = document.querySelector('.uibox-bg');
+            uibox.innerHTML = `
+                <input type="text" class="uibox-input" id="answerInput" placeholder="답변을 입력하세요...">
+                <button class="submit-button" id="submitButton" onclick="submitAnswer()">
+                    <img src="/static/images/button2.png" alt="제출" class="btn-img">
+                    <span class="btn-label">제출</span>
+                </button>
+                <button class="stt-button" id="sttButton" onclick="startSTT()">
+                    <img src="/static/images/mic.png" alt="음성 입력" class="btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span class="mic-fallback" style="display:none; color:#fff; font-size:1.2rem; font-weight:bold;">🎤</span>
+                </button>
+            `;
+            // 다음 버튼 숨기기
+            let nextBtn = document.querySelector('.next-btn');
+            if (nextBtn) nextBtn.style.display = 'none';
+            // 캐릭터 표정 초기화
+            initCharacter();
+            // 다음 질문 표시
+            showNextQuestion();
+        }
+
+        // 결과 페이지로 이동
+        function goToResultPage() {
+            try {
+                console.log('결과 페이지로 이동 시작...');
+                console.log('저장할 결과:', results);
+                
+                // 결과를 세션 스토리지에 저장
+                sessionStorage.setItem('mbtiResults', JSON.stringify(results));
+                console.log('세션 스토리지에 결과 저장 완료');
+                
+                // 최종 결과 페이지로 이동
+                console.log('index3.html로 이동...');
+                window.location.href = 'index3.html';
+            } catch (error) {
+                console.error('결과 페이지 이동 중 오류:', error);
+                alert('결과 페이지로 이동 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        // AI 요약 함수 (주석처리됨)
+        /*
+        async function getAISummary(text, type) {
+            if (!text || text.trim() === '') {
+                return '요약할 내용이 없습니다.';
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/summarize`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        text: text,
+                        type: type
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('AI 요약 요청 실패');
+                }
+
+                const data = await response.json();
+                return data.summary || 'AI 요약을 불러올 수 없습니다.';
+            } catch (error) {
+                console.error('AI 요약 오류:', error);
+                // AI 실패 시 간단한 요약으로 대체
+                return text.length > 100 ? text.substring(0, 100) + '...' : text;
+            }
+        }
+        */
+
+
+
+        // 로딩 점 애니메이션
+        let loadingInterval = null;
+        function startLoadingDots() {
+            const dots = document.getElementById('loadingDots');
+            let count = 0;
+            if (loadingInterval) clearInterval(loadingInterval);
+            loadingInterval = setInterval(() => {
+                count = (count + 1) % 4;
+                dots.textContent = '.'.repeat(count === 0 ? 3 : count);
+            }, 400);
+        }
+        function stopLoadingDots() {
+            if (loadingInterval) clearInterval(loadingInterval);
+            document.getElementById('loadingDots').textContent = '';
+        }
+
+        // STT 기능
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        function startSTT() {
+            // 음성인식 모달 표시
+            showSTTModal();
+        }
+
+        // 녹음 토글 함수 추가
+        function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+                return;
+            }
+
+            // 모바일 브라우저 호환성을 위한 안전한 설정
+            const audioConstraints = {
+                audio: {
+                    sampleRate: 8000,  // 16kHz → 8kHz로 낮춤
+                    channelCount: 1,
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            };
+            
+            navigator.mediaDevices.getUserMedia(audioConstraints)
+                .then(stream => {
+                    // 모바일 브라우저 호환성을 위한 안전한 형식 선택
+                    let mimeType = 'audio/webm;codecs=opus';
+                    
+                    // WebM이 지원되지 않으면 기본 형식 사용
+                    if (!MediaRecorder.isTypeSupported(mimeType)) {
+                        mimeType = 'audio/mp4';
+                    }
+                    if (!MediaRecorder.isTypeSupported(mimeType)) {
+                        mimeType = '';
+                    }
+                    
+                    const options = mimeType ? { mimeType } : {};
+                    console.log('사용할 오디오 형식:', mimeType || '기본 형식');
+                    
+                    mediaRecorder = new MediaRecorder(stream, options);
+                    audioChunks = [];
+                    
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            audioChunks.push(event.data);
+                        }
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: mimeType || 'audio/webm' });
+                        console.log('녹음 완료, 파일 크기:', audioBlob.size, 'bytes');
+                        sendAudioToServer(audioBlob);
+                        
+                        // 스트림 정리
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+                    
+                    mediaRecorder.start();
+                    isRecording = true;
+                    
+                    // 버튼 텍스트와 스타일 변경
+                    const recordBtn = document.getElementById('recordToggleBtn');
+                    if (recordBtn) {
+                        recordBtn.textContent = '⏹️ 녹음 중지';
+                        recordBtn.style.background = '#ffc107';
+                        recordBtn.style.color = '#333';
+                    }
+                    
+                    updateSTTStatus('🎤 음성 녹음 중... (말씀하신 후 "⏹️ 녹음 중지" 버튼을 클릭하세요)');
+                    
+                    console.log('녹음 시작됨');
+                })
+                .catch(error => {
+                    console.error('마이크 권한 오류:', error);
+                    updateSTTStatus('❌ 마이크 권한이 필요합니다. 브라우저에서 마이크 권한을 허용해주세요.');
+                    
+                    // 모바일에서 권한 거부 시 안내
+                    if (error.name === 'NotAllowedError') {
+                        alert('마이크 권한이 필요합니다.\n\n1. 브라우저 주소창의 마이크 아이콘을 클릭\n2. "허용"을 선택\n3. 페이지를 새로고침 후 다시 시도해주세요.');
+                    }
+                });
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                
+                // 버튼 텍스트와 스타일을 원래대로 되돌리기
+                const recordBtn = document.getElementById('recordToggleBtn');
+                if (recordBtn) {
+                    recordBtn.textContent = '🎤 녹음 시작';
+                    recordBtn.style.background = '#28a745';
+                    recordBtn.style.color = 'white';
+                }
+                
+                updateSTTStatus('🔄 음성 데이터를 서버로 전송 중입니다...');
+            }
+        }
+
+        function showSTTModal() {
+            const modal = document.createElement('div');
+            modal.id = 'sttModal';
+            modal.className = 'stt-modal';
+            modal.innerHTML = `
+                <div class="stt-modal-content">
+                    <h3>🎤 음성인식</h3>
+                    <div id="sttStatus" style="margin: 1rem 0; font-size: 1.1em; color: #333;">
+                        녹음 버튼을 눌러서 음성인식을 시작하세요
+                    </div>
+                    <div style="margin: 1rem 0; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;" class="button-group">
+                        <button id="recordToggleBtn" onclick="toggleRecording()" style="padding: 0.5rem 1rem; border-radius: 8px; border: none; background: #28a745; color: white; cursor: pointer; font-weight: bold;">
+                            🎤 녹음 시작
+                        </button>
+                        <button onclick="hideSTTModal()" style="padding: 0.5rem 1rem; border-radius: 8px; border: none; background: #dc3545; color: white; cursor: pointer;">
+                            닫기
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            Object.assign(modal.style, {
+                position: 'fixed',
+                left: 0,
+                top: 0,
+                width: '100vw',
+                height: '100vh',
+                background: 'rgba(0,0,0,0.5)',
+                zIndex: 9999,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+            });
+            
+            document.body.appendChild(modal);
+        }
+
+        function hideSTTModal() {
+            const modal = document.getElementById('sttModal');
+            if (modal) {
+                modal.remove();
+            }
+            if (isRecording) {
+                stopRecording();
+            }
+            // 녹음 상태 초기화
+            isRecording = false;
+        }
+
+        function updateSTTStatus(message) {
+            const statusElement = document.getElementById('sttStatus');
+            if (statusElement) {
+                statusElement.textContent = message;
+            }
+        }
+
+        // 문장 교정 함수
+        async function correctSentence(originalText) {
+            try {
+                console.log('문장 교정 시작:', originalText);
+                
+                const response = await fetch(`${API_BASE_URL}/correct_sentence`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        text: originalText
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('문장 교정 요청 실패');
+                }
+
+                const result = await response.json();
+                console.log('문장 교정 결과:', result);
+                
+                if (result && result.success) {
+                    // 교정된 문장을 입력창에 설정
+                    document.getElementById('answerInput').value = result.corrected_text;
+                    
+                    // 교정 여부에 따른 상태 메시지
+                    if (result.has_changes) {
+                        updateSTTStatus('✅ 음성인식 및 문장 교정 완료!');
+                    } else {
+                        updateSTTStatus('✅ 음성인식 완료! (문장이 이미 정확함)');
+                    }
+                    
+                    // 교정 결과를 사용자에게 보여주기
+                    showCorrectionResult(originalText, result.corrected_text);
+                    
+                    // 디버깅 정보 출력
+                    if (result.ai_response) {
+                        console.log('AI 원본 응답:', result.ai_response);
+                    }
+                    if (result.error) {
+                        console.log('교정 오류:', result.error);
+                    }
+                } else {
+                    updateSTTStatus('✅ 음성인식 완료! (문장 교정 실패)');
+                }
+            } catch (error) {
+                console.error('문장 교정 오류:', error);
+                updateSTTStatus('✅ 음성인식 완료! (문장 교정 실패)');
+            }
+        }
+
+        // 원본 STT 텍스트 저장 변수
+        let originalSTTText = '';
+
+        // 교정 결과 표시 함수
+        function showCorrectionResult(original, corrected) {
+            originalSTTText = original; // 원본 텍스트 저장
+            const hasChanges = original !== corrected;
+            const modal = document.createElement('div');
+            modal.id = 'correctionModal';
+            modal.className = 'correction-modal';
+            modal.innerHTML = `
+                <div class="correction-modal-content" style="background: white; border: 2px solid #007bff; border-radius: 12px; padding: 1.5rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                    <h3 style="color: #007bff; margin-bottom: 1rem;">
+                        🔧 문장 교정 및 편집
+                    </h3>
+                    <p style="color: #666; margin-bottom: 1rem; font-size: 0.9em;">
+                        음성 인식 결과를 교정했습니다. 필요시 직접 편집할 수 있습니다.
+                    </p>
+                    
+                    <div style="margin: 1rem 0;">
+                        <div style="background: #f8f9fa; padding: 0.8rem; border-radius: 6px; margin-bottom: 0.5rem; border-left: 4px solid #6c757d;">
+                            <strong style="color: #495057;">원본:</strong> 
+                            <span style="color: #6c757d;">${original}</span>
+                        </div>
+                        <div style="background: ${hasChanges ? '#fff3cd' : '#d1ecf1'}; padding: 0.8rem; border-radius: 6px; border-left: 4px solid ${hasChanges ? '#ffc107' : '#17a2b8'}; margin-bottom: 1rem;">
+                            <strong style="color: ${hasChanges ? '#856404' : '#0c5460'};">
+                                ${hasChanges ? '교정:' : '확인:'}
+                            </strong> 
+                            <span style="color: ${hasChanges ? '#856404' : '#0c5460'};">
+                                ${corrected}
+                            </span>
+                        </div>
+                        
+                        <div style="margin: 1rem 0;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #333;">편집 (필요시 수정):</label>
+                            <textarea id="correctionTextarea" style="width: 100%; min-height: 80px; padding: 0.8rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; resize: vertical; font-family: inherit;" placeholder="여기서 직접 편집할 수 있습니다...">${corrected}</textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 1rem 0; display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap;">
+                        <button onclick="rejectCorrection()" style="padding: 0.7rem 1rem; border-radius: 8px; border: 1px solid #ddd; background: white; color: #666; cursor: pointer; font-weight: bold; transition: all 0.3s ease;">
+                            원본 유지
+                        </button>
+                        <button onclick="acceptCorrection()" style="padding: 0.7rem 1rem; border-radius: 8px; border: none; background: #28a745; color: white; cursor: pointer; font-weight: bold; transition: all 0.3s ease;">
+                            교정 적용
+                        </button>
+                        <button onclick="applyManualEdit()" style="padding: 0.7rem 1rem; border-radius: 8px; border: none; background: #007bff; color: white; cursor: pointer; font-weight: bold; transition: all 0.3s ease;">
+                            편집 적용
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            Object.assign(modal.style, {
+                position: 'fixed',
+                left: 0,
+                top: 0,
+                width: '100vw',
+                height: '100vh',
+                background: 'rgba(0,0,0,0.5)',
+                zIndex: 10000,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+            });
+            
+            document.body.appendChild(modal);
+        }
+
+        // 교정 적용 함수
+        function acceptCorrection() {
+            const modal = document.getElementById('correctionModal');
+            const editedText = document.getElementById('correctionTextarea').value;
+            document.getElementById('answerInput').value = editedText;
+            if (modal) {
+                modal.remove();
+            }
+            updateSTTStatus('✅ 교정된 문장이 적용되었습니다!');
+        }
+
+        // 교정 거부 함수
+        function rejectCorrection() {
+            const modal = document.getElementById('correctionModal');
+            if (modal) {
+                modal.remove();
+            }
+            // 원본 텍스트로 되돌리기
+            document.getElementById('answerInput').value = originalSTTText;
+            updateSTTStatus('✅ 원본 문장이 유지되었습니다!');
+        }
+
+        // 수동 편집 적용 함수
+        function applyManualEdit() {
+            const modal = document.getElementById('correctionModal');
+            const editedText = document.getElementById('correctionTextarea').value;
+            document.getElementById('answerInput').value = editedText;
+            if (modal) {
+                modal.remove();
+            }
+            updateSTTStatus('✅ 수동 편집이 적용되었습니다!');
+        }
+
+        // 향상된 STT 기능 사용 여부 (기본값을 개선된 모드로 설정)
+        let useEnhancedSTT = true;
+
+        // STT 기능 향상 설정 토글
+        function toggleEnhancedSTT() {
+            useEnhancedSTT = !useEnhancedSTT;
+            const status = useEnhancedSTT ? '활성화' : '비활성화';
+            updateSTTStatus(`향상된 STT 기능이 ${status}되었습니다.`);
+            
+            // 버튼 상태 업데이트
+            const button = document.getElementById('enhancedSTTButton');
+            const icon = document.getElementById('enhancedSTTIcon');
+            const label = document.getElementById('enhancedSTTLabel');
+            
+            if (useEnhancedSTT) {
+                button.classList.add('active');
+                icon.textContent = '⚡';
+                label.textContent = '개선된';
+                icon.title = '향상된 STT 기능 활성화됨';
+            } else {
+                button.classList.remove('active');
+                icon.textContent = '🔧';
+                label.textContent = '기본';
+                icon.title = '향상된 STT 기능 비활성화됨';
+            }
+            
+            // 상태를 세션 스토리지에 저장
+            sessionStorage.setItem('useEnhancedSTT', useEnhancedSTT.toString());
+        }
+
+        // 페이지 로드 시 향상된 STT 설정 복원 (기본값을 개선된 모드로 설정)
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedSetting = sessionStorage.getItem('useEnhancedSTT');
+            if (savedSetting !== null) {
+                useEnhancedSTT = savedSetting === 'true';
+            } else {
+                // 저장된 설정이 없으면 기본적으로 개선된 모드 사용
+                useEnhancedSTT = true;
+                sessionStorage.setItem('useEnhancedSTT', 'true');
+            }
+            
+            // 버튼 상태 복원 (토글 버튼이 주석처리되어 있으므로 제거)
+            /*
+            const button = document.getElementById('enhancedSTTButton');
+            const icon = document.getElementById('enhancedSTTIcon');
+            const label = document.getElementById('enhancedSTTLabel');
+            
+            if (useEnhancedSTT) {
+                button.classList.add('active');
+                icon.textContent = '⚡';
+                label.textContent = '개선된';
+                icon.title = '향상된 STT 기능 활성화됨';
+            } else {
+                button.classList.remove('active');
+                icon.textContent = '🔧';
+                label.textContent = '기본';
+                icon.title = '향상된 STT 기능 비활성화됨';
+            }
+            */
+        });
+
+        async function sendAudioToServer(audioBlob) {
+            const formData = new FormData();
+            formData.append('audio_file', audioBlob, 'recording.wav');
+
+            try {
+                updateSTTStatus('🔄 서버로 음성 전송 중...');
+                console.log('음성 데이터 크기:', audioBlob.size, 'bytes');
+                
+                // 향상된 STT 사용 여부에 따라 엔드포인트 선택
+                const endpoint = useEnhancedSTT ? '/stt_enhanced' : '/stt';
+                console.log(`사용할 STT 엔드포인트: ${endpoint}`);
+                
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('서버 응답 상태:', response.status);
+                console.log('서버 응답 헤더:', response.headers);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('서버 오류 응답:', errorText);
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log('STT 결과:', result);
+                
+                if (result && result.text) {
+                    // STT 결과를 입력창에 설정
+                    document.getElementById('answerInput').value = result.text;
+                    
+                    // 향상된 STT 결과 처리
+                    if (useEnhancedSTT && result.confidence !== undefined) {
+                        const confidencePercent = Math.round(result.confidence * 100);
+                        updateSTTStatus(`✅ 향상된 음성인식 완료! (신뢰도: ${confidencePercent}%)`);
+                        
+                        // 품질 제안 표시
+                        if (result.suggestions && result.suggestions.length > 0) {
+                            showQualitySuggestions(result.suggestions);
+                        }
+                    } else {
+                        updateSTTStatus('✅ 음성인식 완료! 문장을 교정하고 있습니다...');
+                    }
+                    
+                    // 문장 교정 기능 호출 (향상된 교정 사용)
+                    await correctSentenceEnhanced(result.text);
+                } else {
+                    throw new Error('음성 인식 결과가 없습니다.');
+                }
+            } catch (error) {
+                console.error('STT Error:', error);
+                updateSTTStatus('❌ 음성인식 실패: ' + error.message);
+            }
+        }
+
+        // 향상된 문장 교정 함수
+        async function correctSentenceEnhanced(text) {
+            try {
+                // 향상된 교정 사용 여부에 따라 엔드포인트 선택
+                const endpoint = useEnhancedSTT ? '/correct_sentence_enhanced' : '/correct_sentence';
+                console.log(`사용할 교정 엔드포인트: ${endpoint}`);
+                
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                if (!response.ok) {
+                    throw new Error('문장 교정 요청 실패');
+                }
+
+                const result = await response.json();
+                console.log('문장 교정 결과:', result);
+                
+                if (result && result.success) {
+                    // 교정된 문장을 입력창에 설정
+                    document.getElementById('answerInput').value = result.corrected_text;
+                    
+                    // 향상된 교정 결과 처리
+                    if (useEnhancedSTT && result.method_used) {
+                        const methodName = result.method_used === 'enhanced' ? '향상된 교정' : 'AI 교정';
+                        updateSTTStatus(`✅ ${methodName} 완료!`);
+                        
+                        // 교정 방법 표시
+                        if (result.corrections_made && result.corrections_made.length > 0) {
+                            showCorrectionDetails(result.corrections_made);
+                        }
+                    } else {
+                        updateSTTStatus('✅ 음성인식 및 문장 교정 완료!');
+                    }
+                    
+                    // 교정 결과를 사용자에게 보여주기
+                    showCorrectionResult(text, result.corrected_text);
+                    
+                } else {
+                    updateSTTStatus('✅ 음성인식 완료! (문장 교정 실패)');
+                }
+            } catch (error) {
+                console.error('문장 교정 오류:', error);
+                updateSTTStatus('✅ 음성인식 완료! (문장 교정 실패)');
+            }
+        }
+
+
+
+        // 품질 제안 표시
+        function showQualitySuggestions(suggestions) {
+            const suggestionText = suggestions.join('\n• ');
+            updateSTTStatus(`💡 제안: ${suggestionText}`);
+        }
+
+        // 교정 세부사항 표시
+        function showCorrectionDetails(corrections) {
+            const detailsText = corrections.join(', ');
+            console.log(`교정 세부사항: ${detailsText}`);
+        }
+
+        // TTS 기능
+        async function playTTS(text) {
+            try {
+                const formData = new FormData();
+                formData.append('text', text);
+                
+                const response = await fetch(`${API_BASE_URL}/tts`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                const blob = await response.blob();
+                const audio = new Audio(URL.createObjectURL(blob));
+                audio.play();
+            } catch (error) {
+                console.error('TTS Error:', error);
+                alert('음성 재생 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        // 분석 결과에 TTS 버튼 추가
+        function showAnalysisResult(result) {
+            const resultGraph = document.getElementById('resultGraph');
+            resultGraph.style.display = 'block';
+            resultGraph.innerHTML = `
+                <div style="margin: 1rem 0;">
+                    <strong>분석 결과:</strong> 
+                    <span>${result.score.toFixed(1)}점</span>
+                    <button class="tts-button" onclick="playTTS('분석 결과는 ${result.score.toFixed(1)}점 입니다. ${result.detailed_analysis || ''}')" style="margin-left: 1rem;">
+                        🔊 듣기
+                    </button>
+                </div>
+                ${result.detailed_analysis ? `<div style="margin: 0.5rem 0;">${result.detailed_analysis}</div>` : ''}
+                ${result.alternative_response ? `<div style="margin: 0.5rem 0; color: #666;">${result.alternative_response}</div>` : ''}
+            `;
+        }
+
+        // 텍스트 하이라이트 처리 함수
+        function formatAnalysisText(text) {
+            if (!text || text === '상세 분석 데이터가 없습니다.' || text === '분석 근거 데이터가 없습니다.') {
+                return text;
+            }
+            
+            // 분석근거의 경우 핵심 문장만 하이라이트
+            if (text.includes('라는 질문은') || text.includes('라는 표현은')) {
+                // 핵심 문장의 끝을 찾기 위한 패턴들
+                const patterns = [
+                    /(.*?라는 *?기반으로 합니다)/,
+                    /(.*?라는 *?보입니다)/,
+                    /(.*?라는 *?것으로 보입니다)/,
+                    /(.*?라는 *?드러납니다)/,
+                    /(.*?라는 *?드러냅니다)/,
+                    /(.*?라는 *?내포되어 있습니다)/,
+                    /(.*?라는 *?배제할 수 없습니다)/,
+                ];
+                
+                for (const pattern of patterns) {
+                    const match = text.match(pattern);
+                    if (match) {
+                        const highlightedPart = match[1];
+                        const remainingPart = text.substring(match[1].length);
+                        
+                        return `<span style="background: linear-gradient(120deg, #ffd54f 0%, #ffecb3 100%); padding: 2px 4px; border-radius: 3px; font-weight: bold; color: #d84315;">${highlightedPart}</span>${remainingPart}`;
+                    }
+                }
+                
+                // 패턴이 매치되지 않으면 첫 번째 문장만 하이라이트
+                const sentences = text.split(/[.!?]/).filter(sentence => sentence.trim());
+                if (sentences.length > 0) {
+                    const firstSentence = sentences[0].trim();
+                    const remainingText = text.substring(firstSentence.length);
+                    
+                    return `<span style="background: linear-gradient(120deg, #ffd54f 0%, #ffecb3 100%); padding: 2px 4px; border-radius: 3px; font-weight: bold; color: #d84315;">${firstSentence}</span>${remainingText}`;
+                }
+            }
+            
+            // 기본 처리: 첫 번째 문장만 하이라이트
+            const sentences = text.split(/[.!?]/).filter(sentence => sentence.trim());
+            
+            if (sentences.length === 0) {
+                return text;
+            }
+            
+            const highlightedText = sentences.map((sentence, index) => {
+                const trimmedSentence = sentence.trim();
+                if (index === 0 && trimmedSentence) {
+                    return `<span style="background: linear-gradient(120deg, #ffd54f 0%, #ffecb3 100%); padding: 2px 4px; border-radius: 3px; font-weight: bold; color: #d84315;">${trimmedSentence}.</span>`;
+                } else if (trimmedSentence) {
+                    return trimmedSentence + '.';
+                }
+                return '';
+            }).join(' ');
+            
+            return highlightedText;
+        }
+
+        // 상세분석 모달 함수 (AI 요약 기능 제거, 단순 분석 결과만 표시)
+        async function showDetailAnalysis() {
+            if (!lastResultData) return;
+            
+            // 상세분석 모달 내용 생성 (AI 요약 없이 원본 데이터만 표시)
+            const modal = document.createElement('div');
+            modal.className = 'detail-modal';
+            modal.innerHTML = `
+                <div class="detail-modal-content" style="background:#fff; border-radius:16px; max-width:600px; max-height:80vh; margin:50px auto; padding:2em; box-shadow:0 4px 32px rgba(0,0,0,0.18); position:relative; overflow-y:auto; overflow-x:hidden;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.5rem 1rem; border-radius: 6px; margin-bottom: 1rem; text-align: center; font-size: 0.9em; font-weight: bold;">
+                        📊 분석 결과 상세보기
+                    </div>
+                    
+                    <h4 style="margin-bottom:0.7em; font-family: 'HeirofBold';">📋 상세 분석</h4>
+                    <div style="background: #e3f2fd; padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem; border-left: 4px solid #2196f3; font-family: 'HeirofLight';">
+                        ${formatAnalysisText(lastResultData.detailed_analysis || '상세 분석 데이터가 없습니다.')}
+                    </div>
+                    
+                    <h4 style="margin-bottom:0.7em; font-family: 'HeirofBold';">🔍 분석 근거</h4>
+                    <div style="background: #fff8e1; padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem; border-left: 4px solid #ff9800; font-family: 'HeirofLight';">
+                        ${formatAnalysisText(lastResultData.reasoning || '분석 근거 데이터가 없습니다.')}
+                    </div>
+                    
+                    <h4 style="margin-bottom:0.7em; font-family: 'HeirofBold';">💡 개선 제안</h4>
+                    <div style="background: #e8f5e8; padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem; border-left: 4px solid #4caf50; font-family: 'HeirofLight';">
+                        ${(lastResultData.suggestions || []).map(suggestion => `<div style="margin-bottom: 0.5rem;">• ${suggestion}</div>`).join('')}
+                    </div>
+                    
+                    <button onclick="closeDetailModal()" style="margin-top:1em; padding:0.5em 1.5em; border-radius:8px; border:none; background:#1976D2; color:#fff; cursor:pointer; font-family: 'HeirofLight';">닫기</button>
+                </div>
+            `;
+            
+            Object.assign(modal.style, {
+                position: 'fixed', left: 0, top: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.35)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center'
+            });
+            modal.onclick = function(e) { if (e.target === modal) closeDetailModal(); };
+            document.body.appendChild(modal);
+        }
+        function closeDetailModal() {
+            const modal = document.querySelector('.detail-modal');
+            if (modal) modal.remove();
+        }
+
+        // 홈으로 가기 함수
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        // 기존 loadingMessage show/hide 부분을 loadingModal로 변경
+        function showLoadingModal() {
+            document.getElementById('loadingModal').style.display = 'flex';
+            startLoadingDots();
+        }
+        function hideLoadingModal() {
+            document.getElementById('loadingModal').style.display = 'none';
+            stopLoadingDots();
+        }
+
+        // 모바일 최적화: 키보드 이벤트 처리
+        document.addEventListener('DOMContentLoaded', function() {
+            const answerInput = document.getElementById('answerInput');
+            if (answerInput) {
+                // 모바일에서 키보드 완료 버튼 처리
+                answerInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        submitAnswer();
+                    }
+                });
+                
+                // 모바일에서 입력 필드 포커스 시 자동 스크롤
+                answerInput.addEventListener('focus', function() {
+                    setTimeout(() => {
+                        answerInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                });
+            }
+            
+            // 모바일에서 터치 이벤트 최적화
+            const submitButton = document.querySelector('.submit-button');
+            if (submitButton) {
+                submitButton.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    this.style.transform = 'scale(0.95)';
+                });
+                
+                submitButton.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    this.style.transform = 'scale(1)';
+                    submitAnswer();
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

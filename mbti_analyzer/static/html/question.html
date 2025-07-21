@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/reset.css">
+    <link rel="stylesheet" href="/static/css/question.css">
+    <script src="/static/js/question.js"></script>
+    <title>질문</title>
+    <style>
+        /* 홈 버튼 스타일 */
+        .home-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid #2196F3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .home-button:hover {
+            background-color: #2196F3;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- 홈 버튼 -->
+    <div class="home-button" onclick="goHome()" title="홈으로 가기">🏠</div>
+    
+    <!-- 질문 로딩 모달 -->
+    <div id="question_loading_modal" class="modal">
+        <div class="modal_content">
+            <div class="loading_spinner"></div>
+            <p class="loading_text">질문을 로딩 중입니다...</p>
+        </div>
+    </div>
+
+    <!-- 분석 로딩 모달 -->
+    <div id="analysis_modal" class="modal">
+        <div class="modal_content">
+            <div class="loading_spinner"></div>
+            <p class="loading_text">답변을 분석하고 있습니다...</p>
+        </div>
+    </div>
+
+    <!-- 마이크 모달 -->
+    <div id="mic_modal" class="modal" style="display: none;">
+        <div class="modal_content mic_modal_content">
+            <div class="modal_header">
+                <h3>음성 인식</h3>
+                <span class="close" onclick="hideMicModal()">&times;</span>
+            </div>
+            <div class="modal_body">
+                <div class="mic_status">
+                    <div class="mic_icon">🎤</div>
+                    <p id="mic_status_text">마이크 버튼을 눌러 음성 인식을 시작하세요</p>
+                </div>
+                <div class="mic_controls">
+                    <button id="start_recording" class="mic_button">녹음 시작</button>
+                    <button id="stop_recording" class="mic_button" style="display: none;">녹음 중지</button>
+                </div>
+                <div class="mic_guide_title"><span id="mic_modal_question"></span></div>
+                <div class="recognized_text">
+                    <p style="display:inline-block;">인식된 텍스트:</p>
+                    <button type="button" id="clear_recognized_text" class="clear_text_button">삭제</button>
+                    <div id="recognized_result"></div>
+                </div>
+            </div>
+            <div class="modal_footer">
+                <button onclick="applyRecognizedText()" class="modal_button">적용</button>
+                <button onclick="hideMicModal()" class="modal_button secondary">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <header></header>
+    <main>
+        <div id="question_content">
+            <p id="question_text"></p>
+        </div>
+        <div id="character"></div>
+        <div id="user_input">
+            <p id="user_name">사용자</p>
+            <div id="user_input_line"></div>
+            <input type="text" id="user_input_text" placeholder="대답을 입력해주세요.">
+            <div id="questions_buttons">
+                <input type="button" value="제출" id="user_input_button">
+                <div id="mic_button"></div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // 홈으로 가기 함수
+        function goHome() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

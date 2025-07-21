@@ -1,0 +1,359 @@
+@font-face {
+    font-family: 'HeirofLight';
+    src: url('../fonts/HeirofLightRegular.ttf') format('truetype'),
+         url('../fonts/HeirofLightOTFRegular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'HeirofBold';
+    src: url('../fonts/HeirofLightBold.ttf') format('truetype'),
+         url('../fonts/HeirofLightOTFBold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+header {
+    width: 100%;
+    min-width: 1280px;
+    height: 85px;
+    background-color: #D9D9D9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+main {
+    width: 100%;
+    min-width: 1280px;
+    height: 100vh;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'HeirofBold', sans-serif;
+    background-image: url(/static/images/main_bg.png);
+    background-size: cover;
+}
+
+#main_title {
+    margin-top: 113px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#main_logo {
+    width: 616px;
+    height: 192px;
+    background-image: url(/static/images/logo.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin-left: 80px;
+}
+
+#main_content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 60px;
+    gap: 80px;
+    color: rgb(254,157,41);
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    border-radius: 8px;
+    padding: 40px 60px 0px 60px;
+    min-height: 100px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    box-sizing: border-box;
+    z-index: 1;
+}
+
+.main_content_box {
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+#main_content p {
+    font-size: 36px;
+    text-align: center;
+    color: rgb(254,157,41);
+}
+
+.main_content_box > p{
+text-shadow: 
+-1px -1px 0 gray,
+1px -1px 0 gray,
+-1px 1px 0 gray,
+1px 1px 0 gray;
+}
+
+#question_count, #question_type {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 80px;
+}
+
+#question_count{
+    display: flex;
+    flex-direction: row;
+}
+
+#question_count .question_count_box, #question_type .question_type_box{
+    display: flex;
+    gap:19px;
+}
+
+#question_count_1, #question_count_3, #question_count_5, #question_meme, #question_ai{
+    background-color: #fde4b0;
+}
+
+#question_count .question_count_box span, #question_type .question_type_box span{
+    font-size: 24px;
+}
+
+.question_count_box span, .question_type_box span{
+    text-shadow: 
+    -1px -1px 0 gray,
+    1px -1px 0 gray,
+    -1px 1px 0 gray,
+    1px 1px 0 gray;
+}
+
+#start_button {
+    width: 120px;
+    height: 50px;
+    color: #fde4b0;
+    background-color: rgb(254,157,41);
+    margin-top: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    border-radius: 99px;
+    box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    font-family: 'HeirofBold', sans-serif;
+}
+
+#start_button:hover {
+    background-color: rgb(250,145,43);
+    color:white;
+    transition: 0.2s background-color ease-in-out;
+}
+
+#question_count .question_count_box input, #question_type .question_type_box input{
+    width: 20px;
+    height: 20px;
+    border: none;
+    background-color: #fde4b0;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+/* 체크박스가 체크되었을 때 */
+#question_count .question_count_box input:checked, #question_type .question_type_box input:checked {
+    background-color: rgb(254,157,41);
+    border: none;
+    border-radius: 999px;
+}
+
+/* 체크마크 추가 */
+#question_count .question_count_box input:checked::after, #question_type .question_type_box input:checked::after {
+    content: '✓';
+    display: block;
+    text-align: center;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 16px;
+}
+
+/* 모달 스타일 */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+.modal-header {
+    padding: 20px 25px 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.close {
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close:hover {
+    color: #ff6b6b;
+}
+
+.modal-body {
+    padding: 20px 25px;
+}
+
+.modal-body p {
+    margin: 0;
+    color: #555;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.modal-footer {
+    padding: 15px 25px 20px;
+    text-align: right;
+    border-top: 1px solid #eee;
+}
+
+.modal-button {
+    color: #fde4b0;
+    background-color: rgb(254,157,41);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+    box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 0.4);
+}
+
+.modal-button:hover {
+    background-color: rgb(250,145,43);
+    color:white;
+    transition: 0.2s background-color ease-in-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- 모바일 반응형 스타일 추가 --- */
+@media (max-width: 768px) {
+    header, main {
+        min-width: 0;
+        width: 100vw;
+    }
+    main {
+        padding: 0 8px;
+        background-size: cover;
+    }
+    #main_title {
+        margin-top: 40px;
+        gap: 10px;
+    }
+    #main_logo {
+        width: 70vw;
+        max-width: 320px;
+        height: 100px;
+        margin-left: 0;
+        background-size: contain;
+    }
+    #main_content {
+        flex-direction: column;
+        gap: 24px;
+        padding: 20px 8px 0 8px;
+        min-height: 60px;
+        font-size: 18px;
+    }
+    .main_content_box {
+        height: auto;
+        gap: 24px;
+    }
+    #main_content p {
+        font-size: 18px;
+    }
+    .main_content_box > p {
+        font-size: 18px;
+    }
+    #question_count, #question_type {
+        gap: 24px;
+    }
+    #question_count .question_count_box span, #question_type .question_type_box span {
+        font-size: 16px;
+    }
+    #start_button {
+        width: 100px;
+        height: 40px;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+    .modal-content {
+        max-width: 95vw;
+        padding: 0;
+    }
+    .modal-header, .modal-body, .modal-footer {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    #main_logo {
+        width: 90vw;
+        max-width: 220px;
+        height: 60px;
+    }
+    #main_content {
+        font-size: 14px;
+        padding: 10px 2px 0 2px;
+    }
+    #main_content p, .main_content_box > p {
+        font-size: 14px;
+    }
+    #start_button {
+        width: 80px;
+        height: 32px;
+        font-size: 13px;
+    }
+}
