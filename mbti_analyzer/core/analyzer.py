@@ -196,51 +196,131 @@ def analyze_tf_tendency(text: str) -> float:
     logger.info(f"🔍 Fallback 분석 완료: {final_score}점")
     return float(final_score)
 
-async def analyze_with_gemini(text: str) -> Optional[float]:
-    """Gemini AI를 사용하여 T/F 성향 분석"""
+async def analyze_with_gemini(text: str) -> Optional[Dict]:
+    """Gemini AI를 사용하여 T/F 성향 분석 (ver02 스타일 상세 분석)"""
+    logger.info("🔍 Gemini AI 분석 시작")
+    logger.info(f"📝 입력 텍스트: {text}")
+    
     try:
+        # 1. API 키 확인
+        logger.info("🔑 Gemini API 키 확인 중...")
         gemini_key = os.getenv('GEMINI_API_KEY')
         if not gemini_key:
             from mbti_analyzer.config.settings import settings
             gemini_key = settings.gemini_api_key
+            logger.info("환경변수에서 API 키를 찾지 못해 설정 파일에서 확인")
         
         if not gemini_key:
-            logger.warning("Gemini API 키가 설정되지 않았습니다.")
+            logger.error("❌ Gemini API 키가 설정되지 않았습니다.")
+            logger.error("GEMINI_API_KEY 환경변수 또는 settings.gemini_api_key를 확인하세요.")
             return None
         
+        logger.info("✅ Gemini API 키 확인 완료")
+        
+        # 2. Gemini AI 모델 초기화
+        logger.info("🤖 Gemini AI 모델 초기화 중...")
         genai.configure(api_key=gemini_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
+        logger.info("✅ Gemini AI 모델 초기화 완료")
         
+        # 3. 프롬프트 생성 (ver02 스타일 상세 분석)
+        logger.info("📝 분석 프롬프트 생성 중...")
         prompt = f"""
-다음 한국어 텍스트를 분석하여 MBTI의 T(사고형)/F(감정형) 성향을 평가해주세요.
+MBTI T/F 성향 분석 전문가입니다. 답변을 분석하여 T/F 성향을 평가하세요.
 
-평가 기준:
-- T(사고형): 논리적, 객관적, 분석적, 효율성 중시
-- F(감정형): 감정적, 공감적, 관계 중시, 가치 기반
+[분석 기준]
+- T(Thinking): 논리적, 객관적, 분석적 사고, 원인 분석, 체계적 접근, 효율성 중시, 문제 해결 지향
+- F(Feeling): 감정적, 공감적, 관계 중심적 사고, 기분 고려, 공감 표현, 관계 중시, 감정적 지지
+- 점수: 0(매우 강한 T) ~ 100(매우 강한 F), 50=균형
 
-텍스트: "{text}"
+[핵심 분석 원칙]
+1. 답변의 주요 의도와 핵심 메시지에 집중
+2. T 성향 강한 표현: "분석", "원인", "논리", "체계", "효율", "방지", "파악", "결과", "해결", "접근", "단계별", "체계적"
+3. F 성향 강한 표현: "기분", "마음", "공감", "힘들", "안타깝", "궁금", "도와", "함께", "지지", "위로", "걱정", "안타깝"
+4. 혼합 답변 분석: 
+   - T+F 혼합 답변의 경우: 핵심 메시지의 방향성에 따라 판단
+   - "분석하자" + "자책하지 마" → T 성향이 우선 (40-60점)
+   - "함께 생각해보자" → F 성향이 우선 (60-80점)
+5. 맥락별 점수 가이드:
+   - 순수 T 성향 (논리적 해결): 20-40점
+   - T+F 혼합 (분석+공감): 40-70점  
+   - 순수 F 성향 (감정적 지지): 70-90점
 
-다음 형식으로만 응답해주세요:
-<TENDENCY>점수</TENDENCY>
-<REASONING>분석 근거</REASONING>
+[출력 형식]
+[분석] 답변자의 T/F 성향 분석 (성향 강도와 주요 특징 명시)
+[근거] 분석 근거 (구체적 키워드와 표현 방식, 의도 파악)
+[제안] 개선 제안 3가지
+[대안] 대안 답변
+점수: X
 
-점수는 0-100 사이의 숫자로, 0에 가까울수록 T 성향, 100에 가까울수록 F 성향입니다.
+답변: {text}
 """
+        logger.info("✅ 분석 프롬프트 생성 완료")
+        logger.info(f"📋 프롬프트 길이: {len(prompt)} 문자")
         
+        # 4. Gemini AI API 호출
+        logger.info("🚀 Gemini AI API 호출 시작...")
         response = model.generate_content(prompt)
+        logger.info("✅ Gemini AI API 호출 완료")
+        
+        # 5. 응답 검증
+        logger.info("🔍 Gemini AI 응답 검증 중...")
+        if not response:
+            logger.error("❌ Gemini AI 응답이 None입니다.")
+            return None
+            
+        if not response.text:
+            logger.error("❌ Gemini AI 응답 텍스트가 비어있습니다.")
+            return None
+        
         response_text = response.text.strip()
+        logger.info(f"📄 응답 텍스트 길이: {len(response_text)} 문자")
+        logger.info(f"📄 응답 텍스트 미리보기: {response_text[:200]}...")
         
-        # 점수 추출
+        # 6. 점수 추출 (ver02 스타일 개선된 파싱)
+        logger.info("🔢 점수 추출 중...")
         import re
-        tendency_match = re.search(r'<TENDENCY>(\d+(?:\.\d+)?)</TENDENCY>', response_text)
-        if tendency_match:
-            score = float(tendency_match.group(1))
-            return score
         
-        return None
+        # 점수 파싱 정규식 개선: 다양한 띄어쓰기/콜론/한글자 오타 허용
+        score_match = re.search(r"점\s*수\s*[:：=\-]?\s*(\d{1,3})", response_text)
+        if score_match:
+            score = float(score_match.group(1))
+            logger.info(f"✅ 점수 추출 성공: {score}")
+            
+            # 상세분석 파싱 (ver02 스타일)
+            def extract(tag):
+                m = re.search(rf"\[{tag}\](.*?)(?=\[|$)", response_text, re.DOTALL)
+                return m.group(1).strip() if m else ""
+            
+            detailed_analysis = extract("분석")
+            reasoning = extract("근거")
+            suggestions_raw = extract("제안")
+            suggestions = [s.strip() for s in suggestions_raw.split("\n") if s.strip()] if suggestions_raw else []
+            alternative_response = extract("대안")
+            
+            logger.info(f"✅ 상세분석 파싱 완료:")
+            logger.info(f"📋 상세분석: {detailed_analysis[:50]}...")
+            logger.info(f"🔍 분석근거: {reasoning[:50]}...")
+            logger.info(f"💡 개선제안 개수: {len(suggestions)}")
+            logger.info(f"🔄 대안답변: {alternative_response[:50]}...")
+            
+            # 상세 분석 결과를 딕셔너리로 반환
+            return {
+                "score": score,
+                "detailed_analysis": detailed_analysis,
+                "reasoning": reasoning,
+                "suggestions": suggestions,
+                "alternative_response": alternative_response
+            }
+        else:
+            logger.error("❌ 점수 추출 실패: 점수 패턴을 찾을 수 없습니다.")
+            logger.error(f"📄 전체 응답 텍스트: {response_text}")
+            return None
         
     except Exception as e:
-        logger.error(f"Gemini AI 분석 실패: {e}")
+        logger.error(f"❌ Gemini AI 분석 실패: {e}")
+        logger.error(f"❌ 오류 타입: {type(e).__name__}")
+        logger.error(f"❌ 오류 상세: {str(e)}")
         return None
 
 async def analyze_with_groq(text: str) -> Optional[float]:
@@ -297,40 +377,71 @@ async def analyze_with_groq(text: str) -> Optional[float]:
 
 async def analyze_text(text: str) -> Dict:
     """텍스트를 분석하여 T/F 성향 점수를 반환합니다."""
-    logger.info(f"🔍 입력 텍스트: {text.strip()}")
+    logger.info("=" * 50)
+    logger.info("🚀 텍스트 분석 시작")
+    logger.info(f"📝 입력 텍스트: {text.strip()}")
+    logger.info(f"📝 텍스트 길이: {len(text.strip())} 문자")
     
     # 1. Gemini AI 시도
-    logger.info("🔍 Gemini AI 분석 시도 중...")
+    logger.info("🔍 1단계: Gemini AI 분석 시도 중...")
     try:
         gemini_result = await analyze_with_gemini(text)
         if gemini_result is not None:
+            logger.info(f"✅ Gemini AI 분석 성공: {gemini_result}")
+            logger.info("🎯 Gemini AI로 분석 완료")
             return {
-                "score": gemini_result,
+                "score": gemini_result["score"],
                 "method": "gemini",
-                "success": True
+                "success": True,
+                "detailed_analysis": gemini_result.get("detailed_analysis"),
+                "reasoning": gemini_result.get("reasoning"),
+                "suggestions": gemini_result.get("suggestions"),
+                "alternative_response": gemini_result.get("alternative_response")
             }
+        else:
+            logger.warning("⚠️ Gemini AI 분석 결과가 None입니다.")
+            logger.warning("⚠️ 다음 단계(Groq AI)로 진행합니다.")
     except Exception as e:
-        logger.info(f"❌ Gemini AI 분석 실패: {e}")
+        logger.error(f"❌ Gemini AI 분석 실패: {e}")
+        logger.error(f"❌ 오류 타입: {type(e).__name__}")
+        logger.error(f"❌ 오류 상세: {str(e)}")
+        logger.warning("⚠️ 다음 단계(Groq AI)로 진행합니다.")
     
     # 2. Groq AI 시도
-    logger.info("🔍 Groq AI 분석 시도 중...")
+    logger.info("🔍 2단계: Groq AI 분석 시도 중...")
     try:
         groq_result = await analyze_with_groq(text)
         if groq_result is not None:
+            logger.info(f"✅ Groq AI 분석 성공: {groq_result}")
+            logger.info("🎯 Groq AI로 분석 완료")
             return {
                 "score": groq_result,
                 "method": "groq",
                 "success": True
             }
+        else:
+            logger.warning("⚠️ Groq AI 분석 결과가 None입니다.")
+            logger.warning("⚠️ 다음 단계(Fallback)로 진행합니다.")
     except Exception as e:
-        logger.info(f"❌ Groq AI 분석 실패: {e}")
+        logger.error(f"❌ Groq AI 분석 실패: {e}")
+        logger.warning("⚠️ 다음 단계(Fallback)로 진행합니다.")
     
     # 3. Fallback 분석
-    logger.info("🔍 Fallback 분석 함수 사용 중...")
-    fallback_score = analyze_tf_tendency(text)
-    
-    return {
-        "score": fallback_score,
-        "method": "fallback",
-        "success": True
-    } 
+    logger.info("🔍 3단계: Fallback 분석 함수 사용 중...")
+    try:
+        fallback_score = analyze_tf_tendency(text)
+        logger.info(f"✅ Fallback 분석 성공: {fallback_score}")
+        logger.info("🎯 Fallback으로 분석 완료")
+        return {
+            "score": fallback_score,
+            "method": "fallback",
+            "success": True
+        }
+    except Exception as e:
+        logger.error(f"❌ Fallback 분석 실패: {e}")
+        logger.error("❌ 모든 분석 방법이 실패했습니다.")
+        return {
+            "score": 50.0,  # 기본값
+            "method": "error",
+            "success": False
+        } 

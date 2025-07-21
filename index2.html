@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -38,7 +39,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            background-image: url('/static/images/Bg1.png'); /* 전체 배경 이미지 */
+            background-image: url('./images/Bg1.png'); /* 전체 배경 이미지 */
             background-size: cover;
             background-position: center;
         }
@@ -75,7 +76,7 @@
             max-width: 100vw;
             height: 150px;
             margin: 0 auto 0 auto;
-            background: url('/static/images/textbar1.png') no-repeat center;
+            background: url('./images/textbar1.png') no-repeat center;
             background-size: cover;
             display: flex;
             align-items: center;
@@ -119,19 +120,19 @@
             background-position: center;
         }
         .face-very-angry {
-            background-image: url('/static/images/Very_angry.png');
+            background-image: url('/images/Very_angry.png');
         }
         .face-angry {
-            background-image: url('/static/images/Simple_angry.png');
+            background-image: url('/images/Simple_angry.png');
         }
         .face-neutral {
-            background-image: url('/static/images/Base.png');
+            background-image: url('/images/Base.png');
         }
         .face-happy {
-            background-image: url('/static/images/Simple_happy.png');
+            background-image: url('/images/Simple_happy.png');
         }
         .face-very-happy {
-            background-image: url('/static/images/Very_happy.png');
+            background-image: url('/images/Very_happy.png');
         }
         #resultGraph {
             margin-top: 1.5rem;
@@ -153,7 +154,7 @@
             bottom: 80px; /* 하단에서 80px 위로 띄움 */
             z-index: 10;
             box-shadow: 0 -2px 8px rgba(33,150,243,0.07);
-            background-image: url('/static/images/textbar2.png'); /* 하단 입력 박스 배경 */
+            background-image: url('./images/textbar2.png'); /* 하단 입력 박스 배경 */
             background-size: auto;
             background-position: center;
             height: auto;
@@ -891,7 +892,7 @@
         font-size: 1.3rem;
         border: none;
         border-radius: 0;
-                    background: url('/static/images/textbar2.png') no-repeat center/cover;
+                    background: url('./images/textbar2.png') no-repeat center/cover;
         color: #222;
         padding: 0 40px;
         box-sizing: border-box;
@@ -938,7 +939,7 @@
         display: block;
     }
     .detail-modal-content {
-                    background: url('/static/images/note.png') no-repeat center center !important;
+                    background: url('./images/note.png') no-repeat center center !important;
         background-size: cover !important;
         border-radius: 16px;
         max-width: 600px;
@@ -1148,11 +1149,11 @@
     <div class="uibox-bg">
         <input type="text" class="uibox-input" id="answerInput" placeholder="답변을 입력하세요...">
         <button class="submit-button" id="submitButton" onclick="submitAnswer()">
-                                <img src="/static/images/button2.png" alt="제출" class="btn-img">
+                                <img src="./images/button2.png" alt="제출" class="btn-img">
             <span class="btn-label">제출</span>
         </button>
         <button class="stt-button" id="sttButton" onclick="startSTT()">
-            <img src="/static/images/mic.png" alt="음성 입력" class="btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <img src="./images/mic.png" alt="음성 입력" class="btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
             <span class="mic-fallback" style="display:none; color:#fff; font-size:1.2rem; font-weight:bold;">🎤</span>
         </button>
         <!-- 향상된 STT 토글 버튼 주석처리
@@ -1180,7 +1181,7 @@
         min-height: 150px;
         height: auto;
         max-width: 90vw;
-                    background: url('/static/images/textbar2.png') no-repeat center/contain;
+                    background: url('./images/textbar2.png') no-repeat center/contain;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1857,6 +1858,16 @@
                     throw new Error('API 응답 데이터가 올바르지 않습니다.');
                 }
                 
+                console.log('📊 API 응답 데이터:', data);
+                console.log('📋 상세분석:', data.detailed_analysis);
+                console.log('🔍 분석근거:', data.reasoning);
+                console.log('💡 개선제안:', data.suggestions);
+                console.log('🔍 데이터 타입 확인:');
+                console.log('  - detailed_analysis 타입:', typeof data.detailed_analysis);
+                console.log('  - reasoning 타입:', typeof data.reasoning);
+                console.log('  - suggestions 타입:', typeof data.suggestions);
+                console.log('  - suggestions 길이:', Array.isArray(data.suggestions) ? data.suggestions.length : '배열 아님');
+                
                 results.push({
                     question: document.getElementById('question').textContent,
                     answer: answer,
@@ -1867,6 +1878,7 @@
                     alternative_response: data.alternative_response
                 });
                 lastResultData = data; // 전역 변수에 저장
+                console.log('💾 lastResultData 저장 완료:', lastResultData);
                 currentAnalysisController = null; // 컨트롤러 초기화
                 hideLoadingModal();
                 showResult(data); // tfScore가 아니라 data 전체를 넘김
@@ -1933,7 +1945,7 @@
                         </div>
                     </div>
                     <button class="detail-btn" onclick="showDetailAnalysis()">
-                        <img src="/static/Question_pg/note_button.png" alt="상세 분석 보기" class="detail-btn-img">
+                        <img src="./Question_pg/note_button.png" alt="상세 분석 보기" class="detail-btn-img">
                     </button>
                 </div>
             `;
@@ -1993,11 +2005,11 @@
             uibox.innerHTML = `
                 <input type="text" class="uibox-input" id="answerInput" placeholder="답변을 입력하세요...">
                 <button class="submit-button" id="submitButton" onclick="submitAnswer()">
-                    <img src="/static/images/button2.png" alt="제출" class="btn-img">
+                    <img src="./images/button2.png" alt="제출" class="btn-img">
                     <span class="btn-label">제출</span>
                 </button>
                 <button class="stt-button" id="sttButton" onclick="startSTT()">
-                    <img src="/static/images/mic.png" alt="음성 입력" class="btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <img src="./images/mic.png" alt="음성 입력" class="btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <span class="mic-fallback" style="display:none; color:#fff; font-size:1.2rem; font-weight:bold;">🎤</span>
                 </button>
             `;
@@ -2679,11 +2691,18 @@
             return highlightedText;
         }
 
-        // 상세분석 모달 함수 (AI 요약 기능 제거, 단순 분석 결과만 표시)
+        // 상세분석 모달 함수 (ver02에서 가져온 간단하고 깔끔한 버전)
         async function showDetailAnalysis() {
-            if (!lastResultData) return;
+            console.log('🔍 상세분석 모달 호출됨');
+            console.log('📊 lastResultData:', lastResultData);
             
-            // 상세분석 모달 내용 생성 (AI 요약 없이 원본 데이터만 표시)
+            if (!lastResultData) {
+                console.error('❌ lastResultData가 없습니다');
+                alert('분석 데이터가 없습니다. 먼저 답변을 제출해주세요.');
+                return;
+            }
+            
+            // 상세분석 모달 내용 생성 (ver02 스타일)
             const modal = document.createElement('div');
             modal.className = 'detail-modal';
             modal.innerHTML = `
@@ -2716,6 +2735,7 @@
             });
             modal.onclick = function(e) { if (e.target === modal) closeDetailModal(); };
             document.body.appendChild(modal);
+            console.log('✅ 모달 생성 및 추가 완료');
         }
         function closeDetailModal() {
             const modal = document.querySelector('.detail-modal');
