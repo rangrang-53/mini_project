@@ -1,3 +1,52 @@
+/* 폰트 정의 */
+@font-face {
+    font-family: 'HeirofLight';
+    src: url('/fonts/HeirofLightRegular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'HeirofBold';
+    src: url('/fonts/HeirofLightBold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'HeirofLightOTF';
+    src: url('/fonts/HeirofLightOTFRegular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'HeirofBoldOTF';
+    src: url('/fonts/HeirofLightOTFBold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'JejuHallasan';
+    src: url('/fonts/JejuHallasan.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'NanumPenScript';
+    src: url('/fonts/나눔손글씨 규리의 일기.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 /* 공통 CSS 스타일 */
 * {
     margin: 0;
@@ -6,7 +55,7 @@
 }
 
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'HeirofLight', 'JejuHallasan', 'NanumPenScript', 'Arial', sans-serif;
     line-height: 1.6;
     color: #333;
     background-color: #f5f5f5;
@@ -77,4 +126,48 @@ textarea {
         width: 95%;
         margin: 10% auto;
     }
+}
+
+/* 폰트 유틸리티 클래스 */
+.font-heirof-light {
+    font-family: 'HeirofLight', sans-serif;
+}
+
+.font-heirof-light-otf {
+    font-family: 'HeirofLightOTF', sans-serif;
+}
+
+.font-jeju-hallasan {
+    font-family: 'JejuHallasan', sans-serif;
+}
+
+.font-nanum-pen {
+    font-family: 'NanumPenScript', cursive;
+}
+
+/* 폰트 가중치 유틸리티 */
+.font-normal {
+    font-weight: normal;
+}
+
+.font-bold {
+    font-weight: bold;
+}
+
+/* 한국어 텍스트 최적화 */
+.korean-text {
+    font-family: 'JejuHallasan', 'NanumPenScript', 'HeirofLight', sans-serif;
+    word-break: keep-all;
+    line-height: 1.8;
+}
+
+/* 제목용 폰트 */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'HeirofLight', 'JejuHallasan', sans-serif;
+    font-weight: bold;
+}
+
+/* 본문용 폰트 */
+p, div, span {
+    font-family: 'HeirofLight', 'JejuHallasan', 'NanumPenScript', sans-serif;
 } 

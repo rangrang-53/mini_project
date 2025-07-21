@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>MBTI T/F 분석기 - 질문</title>
-    <link rel="stylesheet" href="/static/common.css">
+    <link rel="stylesheet" href="/common.css">
     <style>
         /* 모래시계 회전 애니메이션 추가 */
         @keyframes rotate {
@@ -1209,10 +1209,10 @@
         <input type="text" class="uibox-input" id="answerInput" placeholder="답변을 입력하세요...">
         <button class="submit-button" id="submitButton" onclick="submitAnswer()">
                                 <img src="/images/button2.png" alt="제출" class="btn-img">
-            <span class="btn-label">제출</span>
+            <span class="btn-label" style="font-family: 'HeirofBold';">제출</span>
         </button>
         <button class="stt-button" id="sttButton" onclick="startSTT()">
-            <img src="/images/mic.png" alt="음성 입력" class="btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <img src="/images/mic.png" alt="음성 입력" class="btn-img" style="font-family: 'HeirofBold';" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
             <span class="mic-fallback" style="display:none; color:#fff; font-size:1.2rem; font-weight:bold;">🎤</span>
         </button>
         <!-- 향상된 STT 토글 버튼 주석처리

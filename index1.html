@@ -145,7 +145,13 @@
             border: 2px solid transparent;
             position: relative;
             overflow: hidden;
+            width: 90%;
         }
+
+        .radio-group:nth-of-type(1) .radio-label{
+            width: 100%;
+        }
+
         
         .radio-label:hover {
             background: rgba(255, 255, 255, 0.2);
@@ -227,6 +233,10 @@
             .radio-group {
                 align-items: center;
             }
+
+            .radio-label {
+                width: 40%;
+            }
             
             .vertical-radio-group {
                 align-items: center;
@@ -297,15 +307,15 @@
                         <h3 class="setting-title">
                             분석 횟수
                         </h3>
-                        <div class="radio-group">
-                            <label class="radio-label setting-label">
+                        <div class="radio-group" style="display: flex; align-items: center; justify-content: center;">
+                            <label class="radio-label setting-label" style="width: 40%;">
                                 <input type="radio" name="count" value="1" checked> 1회
                             </label>
-                            <label class="radio-label">
+                            <label class="radio-label" style="width: 40%;">
                                 <input type="radio" name="count" value="3">
                                 <span class="setting-label">3회</span>
                             </label>
-                            <label class="radio-label">
+                            <label class="radio-label" style="width: 40%;">
                                 <input type="radio" name="count" value="5">
                                 <span class="setting-label">5회</span>
                             </label>
@@ -316,16 +326,16 @@
                         <h3 class="setting-title">
                             질문 타입
                         </h3>
-                        <div class="radio-group vertical-radio-group">
+                        <div class="radio-group vertical-radio-group" style="display: flex; align-items: center; justify-content: center;">
                             <!-- <label class="radio-label">
                                 <input type="radio" name="questionSource" value="question2" checked>
                                 <span class="setting-label">구어체 질문(question2.json)</span>
                             </label> -->
-                            <label class="radio-label">
+                            <label class="radio-label" style="width: 50%;">
                                 <input type="radio" name="questionSource" value="question2" checked>
-                                <span class="setting-label">인터넷 밈(스페셜)</span>
+                                <span class="setting-label">인터넷 밈</span>
                             </label>
-                            <label class="radio-label">
+                            <label class="radio-label" style="width: 50%;">
                                 <input type="radio" name="questionSource" value="ai">
                                 <span class="setting-label">AI 맞춤형</span>
                             </label>
