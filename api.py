@@ -414,7 +414,7 @@ def transcribe_audio_file(audio_file_path: str) -> str:
     """음성 파일을 텍스트로 변환합니다."""
     try:
         # Whisper 모델을 사용한 음성 인식 (한국어 강제 설정)
-        model = whisper.load_model("medium")  # base -> medium으로 변경 (정확도 향상)
+        model = whisper.load_model("small")  # medium -> small로 변경 (속도 향상)
         result = model.transcribe(
             audio_file_path,
             language="ko",  # 한국어로 강제 설정
@@ -500,7 +500,7 @@ def transcribe_audio_file_with_language(audio_file_path: str, language: str = "k
         logger.info(f"🔍 언어 코드 정규화: {language} -> {normalized_language}")
         
         # Whisper 모델을 사용한 음성 인식 (언어 설정 적용)
-        model = whisper.load_model("medium")  # base -> medium으로 변경 (정확도 향상)
+        model = whisper.load_model("small")  # medium -> small로 변경 (속도 향상)
         result = model.transcribe(
             audio_file_path,
             language=normalized_language,  # 정규화된 언어 설정 사용
@@ -513,8 +513,7 @@ def transcribe_audio_file_with_language(audio_file_path: str, language: str = "k
             logprob_threshold=-1.0,  # 로그 확률 임계값
             compression_ratio_threshold=2.4,  # 압축 비율 임계값
             initial_prompt="이것은 한국어 음성입니다.",  # 초기 프롬프트로 한국어 강제
-            word_timestamps=True,  # 단어별 타임스탬프 활성화
-            progress_bar=False  # 진행률 바 숨김
+            word_timestamps=True  # 단어별 타임스탬프 활성화
         )
         
         # 결과 후처리 - 반복 텍스트 정리
@@ -1113,7 +1112,7 @@ else:
 
 # STT 모델 초기화
 print("Loading Whisper model...")
-whisper_model = whisper.load_model("medium")  # base -> medium으로 변경 (정확도 향상)
+whisper_model = whisper.load_model("small")  # medium -> small로 변경 (속도 향상)
 print("Whisper model loaded successfully!")
 
 # 정적 파일들을 서비스
