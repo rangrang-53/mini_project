@@ -5,6 +5,7 @@ T/F 성향 분석과 관련된 API 엔드포인트들을 정의합니다.
 """
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Dict, List, Optional
 import logging
@@ -40,25 +41,57 @@ class FinalAnalysisResponse(BaseModel):
 @router.post("/api/v1/analyze")
 async def analyze_text_endpoint(request: TextRequest):
     """텍스트를 분석하여 T/F 성향 점수를 반환합니다."""
+    logger.info("=" * 60)
+    logger.info("🌐 API 분석 요청 시작")
+    logger.info(f"📝 요청 텍스트: {request.text}")
+    logger.info(f"📏 텍스트 길이: {len(request.text)} 문자")
+    
     try:
-        logger.info(f"🔍 텍스트 분석 요청 처리 중... (텍스트 길이: {len(request.text)})")
+        # 1. 텍스트 검증
+        logger.info("🔍 1단계: 텍스트 검증 중...")
+        if not request.text or not request.text.strip():
+            logger.error("❌ 텍스트가 비어있습니다.")
+            raise HTTPException(status_code=400, detail="텍스트가 비어있습니다.")
         
-        # 텍스트 분석 수행
+        logger.info("✅ 텍스트 검증 완료")
+        
+        # 2. 텍스트 분석 수행
+        logger.info("🔍 2단계: 텍스트 분석 수행 중...")
         result = await analyze_text(request.text)
+        logger.info(f"✅ 텍스트 분석 완료: {result}")
         
+        # 3. 분석 결과 검증
+        logger.info("🔍 3단계: 분석 결과 검증 중...")
         if not result["success"]:
+            logger.error("❌ 분석에 실패했습니다.")
             raise HTTPException(status_code=500, detail="분석에 실패했습니다.")
         
         score = result["score"]
         method = result["method"]
+        logger.info(f"✅ 분석 결과 검증 완료 - 점수: {score}, 방법: {method}")
         
-        # 점수에 따른 상세 분석
-        detailed_analysis = generate_detailed_analysis(score)
-        reasoning = generate_reasoning(score, method)
-        suggestions = generate_suggestions(score)
-        alternative_response = generate_alternative_response(score)
+        # 4. 상세 분석 생성 (Gemini에서 파싱된 결과 사용)
+        logger.info("🔍 4단계: 상세 분석 생성 중...")
         
-        return AnalysisResponse(
+        # Gemini에서 파싱된 상세 분석 결과가 있으면 사용, 없으면 기본 생성
+        if result.get("detailed_analysis"):
+            detailed_analysis = result["detailed_analysis"]
+            reasoning = result.get("reasoning", "")
+            suggestions = result.get("suggestions", [])
+            alternative_response = result.get("alternative_response", "")
+            logger.info("✅ Gemini에서 파싱된 상세 분석 결과 사용")
+        else:
+            detailed_analysis = generate_detailed_analysis(score)
+            reasoning = generate_reasoning(score, method)
+            suggestions = generate_suggestions(score)
+            alternative_response = generate_alternative_response(score)
+            logger.info("✅ 기본 상세 분석 생성")
+        
+        logger.info("✅ 상세 분석 생성 완료")
+        
+        # 5. 응답 생성
+        logger.info("🔍 5단계: 응답 생성 중...")
+        response_data = AnalysisResponse(
             score=score,
             detailed_analysis=detailed_analysis,
             reasoning=reasoning,
@@ -66,9 +99,29 @@ async def analyze_text_endpoint(request: TextRequest):
             alternative_response=alternative_response
         )
         
+        # 6. 로깅 및 반환
+        logger.info("✅ API 분석 완료")
+        logger.info(f"📊 최종 점수: {score}")
+        logger.info(f"🔧 사용 방법: {method}")
+        logger.info(f"📋 상세분석 길이: {len(detailed_analysis)} 문자")
+        logger.info(f"🔍 분석근거 길이: {len(reasoning)} 문자")
+        logger.info(f"💡 개선제안 개수: {len(suggestions)}")
+        logger.info(f"🔄 대안응답 길이: {len(alternative_response)} 문자")
+        logger.info("=" * 60)
+        
+        return JSONResponse(
+            content=response_data.dict(),
+            media_type="application/json; charset=utf-8"
+        )
+        
+    except HTTPException:
+        # HTTPException은 그대로 재발생
+        raise
     except Exception as e:
-        logger.error(f"분석 중 오류 발생: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"❌ 분석 중 예상치 못한 오류 발생: {e}")
+        logger.error(f"❌ 오류 타입: {type(e).__name__}")
+        logger.error(f"❌ 오류 상세: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"분석 중 오류가 발생했습니다: {str(e)}")
 
 @router.post("/final_analyze")
 @router.post("/api/v1/final_analyze")
