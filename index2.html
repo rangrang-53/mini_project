@@ -2162,14 +2162,15 @@
                 return;
             }
 
-            // 모바일 브라우저 호환성을 위한 안전한 설정
+            // 모바일 브라우저 호환성을 위한 안전한 설정 (한국어 고정)
             const audioConstraints = {
                 audio: {
                     sampleRate: 8000,  // 16kHz → 8kHz로 낮춤
                     channelCount: 1,
                     echoCancellation: true,
                     noiseSuppression: true,
-                    autoGainControl: true
+                    autoGainControl: true,
+                    language: 'ko-KR'  // 한국어로 고정
                 }
             };
             
@@ -2256,7 +2257,7 @@
             modal.className = 'stt-modal';
             modal.innerHTML = `
                 <div class="stt-modal-content">
-                    <h3>🎤 음성인식</h3>
+                    <h3>🎤 음성인식 </h3>
                     <div id="sttStatus" style="margin: 1rem 0; font-size: 1.1em; color: #333;">
                         녹음 버튼을 눌러서 음성인식을 시작하세요
                     </div>
@@ -2524,6 +2525,7 @@
         async function sendAudioToServer(audioBlob) {
             const formData = new FormData();
             formData.append('audio_file', audioBlob, 'recording.wav');
+            formData.append('language', 'ko-KR');  // 한국어로 고정
 
             try {
                 updateSTTStatus('🔄 서버로 음성 전송 중...');

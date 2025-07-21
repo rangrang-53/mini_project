@@ -25,15 +25,27 @@ import whisper
 from gtts import gTTS
 import tempfile
 
+# 불필요한 디버깅 로그 비활성화 (최상단에 위치)
+logging.getLogger('multipart').setLevel(logging.WARNING)
+logging.getLogger('numba').setLevel(logging.WARNING)
+logging.getLogger('uvicorn').setLevel(logging.WARNING)
+logging.getLogger('uvicorn.error').setLevel(logging.WARNING)
+logging.getLogger('uvicorn.access').setLevel(logging.WARNING)
+for handler in logging.root.handlers:
+    handler.setLevel(logging.WARNING)
+
 # 로깅 설정
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('debug.log', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
-)
+# 파일 핸들러 (모든 로그 기록)
+file_handler = logging.FileHandler('debug.log', encoding='utf-8')
+file_handler.setLevel(logging.INFO)  # DEBUG -> INFO로 변경
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+
+# 콘솔 핸들러 (중요한 정보만 표시)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.WARNING)  # 터미널에는 WARNING 이상만
+console_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+
+logging.basicConfig(level=logging.INFO, handlers=[file_handler, console_handler])
 logger = logging.getLogger(__name__)
 
 # T/F 성향 분석 함수들 (모듈화 이전 상태)
@@ -401,10 +413,116 @@ def generate_final_analysis(results: List[Dict]) -> Dict:
 def transcribe_audio_file(audio_file_path: str) -> str:
     """음성 파일을 텍스트로 변환합니다."""
     try:
-        # Whisper 모델을 사용한 음성 인식
-        result = whisper.load_model("base").transcribe(audio_file_path)
+        # Whisper 모델을 사용한 음성 인식 (한국어 강제 설정)
+        model = whisper.load_model("small")  # medium -> small로 변경 (속도 향상)
+        result = model.transcribe(
+            audio_file_path,
+            language="ko",  # 한국어로 강제 설정
+            task="transcribe",
+            fp16=False,  # CPU에서 FP16 문제 해결
+            verbose=False,  # 불필요한 로그 제거
+            condition_on_previous_text=False,  # 이전 텍스트 조건 제거
+            temperature=0.0,  # 결정적 출력
+            no_speech_threshold=0.6,  # 무음 임계값
+            logprob_threshold=-1.0,  # 로그 확률 임계값
+            compression_ratio_threshold=2.4,  # 압축 비율 임계값
+            initial_prompt="이것은 한국어 음성입니다."  # 초기 프롬프트로 한국어 강제
+        )
         return result["text"]
     except Exception as e:
+        logger.error(f"[STT 오류] {str(e)}")
+        return f"음성 인식 중 오류가 발생했습니다: {str(e)}"
+
+def normalize_language_code(language: str) -> str:
+    """언어 코드를 Whisper가 지원하는 형식으로 정규화합니다."""
+    if not language:
+        return "ko"
+    
+    # 일반적인 한국어 코드들을 'ko'로 변환
+    korean_codes = ["ko", "ko-KR", "ko-KP", "kor", "korean"]
+    if language.lower() in korean_codes:
+        return "ko"
+    
+    # 다른 언어 코드들도 처리
+    language = language.lower()
+    if language.startswith("ko-"):
+        return "ko"
+    elif language.startswith("en-"):
+        return "en"
+    elif language.startswith("ja-"):
+        return "ja"
+    elif language.startswith("zh-"):
+        return "zh"
+    
+    return language
+
+def clean_repeated_text(text: str) -> str:
+    """반복되는 텍스트를 정리합니다."""
+    if not text:
+        return text
+    
+    # 공백 정리
+    text = text.strip()
+    
+    # 같은 단어가 3번 이상 반복되는 경우 처리
+    words = text.split()
+    if len(words) < 3:
+        return text
+    
+    cleaned_words = []
+    for i, word in enumerate(words):
+        # 이전 2개 단어와 같은지 확인
+        if i >= 2 and word == words[i-1] == words[i-2]:
+            continue  # 반복되는 단어 건너뛰기
+        cleaned_words.append(word)
+    
+    result = " ".join(cleaned_words)
+    
+    # 전체 문장이 반복되는 경우 (예: "시원한 시원한 시원한...")
+    if len(result.split()) > 10:
+        # 가장 많이 나타나는 단어 찾기
+        word_count = {}
+        for word in result.split():
+            word_count[word] = word_count.get(word, 0) + 1
+        
+        # 가장 많이 나타나는 단어가 전체의 50% 이상이면 첫 번째만 유지
+        most_common_word = max(word_count, key=word_count.get)
+        if word_count[most_common_word] > len(result.split()) * 0.5:
+            result = most_common_word
+    
+    return result
+
+def transcribe_audio_file_with_language(audio_file_path: str, language: str = "ko") -> str:
+    """언어 설정을 받는 음성 파일을 텍스트로 변환합니다."""
+    try:
+        # 언어 코드 정규화
+        normalized_language = normalize_language_code(language)
+        logger.info(f"🔍 언어 코드 정규화: {language} -> {normalized_language}")
+        
+        # Whisper 모델을 사용한 음성 인식 (언어 설정 적용)
+        model = whisper.load_model("small")  # medium -> small로 변경 (속도 향상)
+        result = model.transcribe(
+            audio_file_path,
+            language=normalized_language,  # 정규화된 언어 설정 사용
+            task="transcribe",
+            fp16=False,  # CPU에서 FP16 문제 해결
+            verbose=False,  # 불필요한 로그 제거
+            condition_on_previous_text=False,  # 이전 텍스트 조건 제거
+            temperature=0.0,  # 결정적 출력
+            no_speech_threshold=0.6,  # 무음 임계값
+            logprob_threshold=-1.0,  # 로그 확률 임계값
+            compression_ratio_threshold=2.4,  # 압축 비율 임계값
+            initial_prompt="이것은 한국어 음성입니다.",  # 초기 프롬프트로 한국어 강제
+            word_timestamps=True  # 단어별 타임스탬프 활성화
+        )
+        
+        # 결과 후처리 - 반복 텍스트 정리
+        text = result["text"]
+        text = clean_repeated_text(text)
+        
+        return text
+    except Exception as e:
+        logger.error(f"[STT 오류] {str(e)}")
         return f"음성 인식 중 오류가 발생했습니다: {str(e)}"
 
 
@@ -465,11 +583,11 @@ def text_to_speech(text: str, output_path: str, lang='ko-KR', voice_name='ko-KR-
             return False
 
 
-def transcribe_audio_file_enhanced(audio_file_path: str) -> Dict:
+def transcribe_audio_file_enhanced(audio_file_path: str, language: str = "ko") -> Dict:
     """향상된 음성 인식 기능"""
     try:
-        # 기본 STT 수행
-        text = transcribe_audio_file(audio_file_path)
+        # 기본 STT 수행 (언어 설정 적용)
+        text = transcribe_audio_file_with_language(audio_file_path, language)
         
         # 신뢰도 계산 (간단한 휴리스틱)
         confidence = 0.8
@@ -495,6 +613,7 @@ def transcribe_audio_file_enhanced(audio_file_path: str) -> Dict:
             "has_alternatives": len(alternatives) > 0
         }
     except Exception as e:
+        logger.error(f"[STT 오류] {str(e)}")
         return {
             "text": f"음성 인식 오류: {str(e)}",
             "original_text": "",
@@ -510,8 +629,11 @@ def validate_audio_quality(audio_file_path: str) -> Dict:
         import librosa
         import numpy as np
         
-        # 오디오 파일 로드
-        y, sr = librosa.load(audio_file_path, sr=None)
+        # 오디오 파일 로드 (경고 억제)
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            y, sr = librosa.load(audio_file_path, sr=None)
         duration = len(y) / sr
         
         # 기본 품질 검증
@@ -546,6 +668,7 @@ def validate_audio_quality(audio_file_path: str) -> Dict:
         }
         
     except Exception as e:
+        logger.error(f"[오디오 품질 검증 오류] {str(e)}")
         # librosa가 없거나 오류 발생 시 기본값 반환
         return {
             "valid": True,
@@ -634,6 +757,7 @@ def correct_sentence_with_ai_enhanced(text: str) -> Dict:
             }
             
     except Exception as e:
+        logger.error(f"[AI 문장 교정 오류] {str(e)}")
         return {
             "success": True,
             "corrected_text": text,
@@ -988,7 +1112,7 @@ else:
 
 # STT 모델 초기화
 print("Loading Whisper model...")
-whisper_model = whisper.load_model("base")
+whisper_model = whisper.load_model("small")  # medium -> small로 변경 (속도 향상)
 print("Whisper model loaded successfully!")
 
 # 정적 파일들을 서비스
@@ -1747,7 +1871,7 @@ async def speech_to_text(audio_file: UploadFile = File(...)):
 
 @app.post("/stt_enhanced")
 @app.post("/api/v1/stt_enhanced")
-async def speech_to_text_enhanced(audio_file: UploadFile = File(...)):
+async def speech_to_text_enhanced(audio_file: UploadFile = File(...), language: str = Form("ko")):
     """
     향상된 STT 기능 - 더 정확한 음성 인식과 품질 검증
     """
@@ -1776,8 +1900,11 @@ async def speech_to_text_enhanced(audio_file: UploadFile = File(...)):
                         if isinstance(value, list):
                             quality_result[key] = [float(v) if hasattr(v, 'item') else v for v in value]
             
-            # 2단계: 향상된 STT 처리
-            stt_result = transcribe_audio_file_enhanced(temp_file_path)
+            # 2단계: 향상된 STT 처리 (한국어 강제 설정)
+            # 언어 코드 정규화
+            normalized_language = normalize_language_code(language)
+            logger.info(f"🔍 STT 언어 설정: {language} -> {normalized_language}")
+            stt_result = transcribe_audio_file_enhanced(temp_file_path, normalized_language)
             
             # 3단계: 결과 정리
             response_data = {
