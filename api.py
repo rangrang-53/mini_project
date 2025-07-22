@@ -1112,7 +1112,7 @@ else:
 
 # STT 모델 초기화
 print("Loading Whisper model...")
-whisper_model = whisper.load_model("small")  # medium -> small로 변경 (속도 향상)
+whisper_model = whisper.load_model("medium")  # small -> medium으로 변경 (정확도 향상)
 print("Whisper model loaded successfully!")
 
 # 정적 파일들을 서비스

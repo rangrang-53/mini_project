@@ -499,6 +499,9 @@
         <div class="final-page" id="finalPage">
             <!-- <h1>최종 분석 결과</h1> -->
             <div id="finalOneLiner"></div>
+            <div style="text-align:center; margin-bottom:1.5rem;">
+                <button class="share-btn" onclick="shareFinalResult()" style="padding:0.7em 1.5em; border-radius:8px; border:none; background:#1976D2; color:#fff; cursor:pointer; font-family: 'JejuHallasan', 'sans-serif'; font-size:1.1em; font-weight:bold;">🔗 공유하기</button>
+            </div>
             <div class="result-bg-box">
                 <img src="Final/Black_board.png" alt="" class="bg-img">
                 <div class="result-flex-container">
@@ -985,5 +988,30 @@
             }
         });
         </script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script>
+function shareFinalResult() {
+    const resultBox = document.querySelector('.result-bg-box');
+    if (!resultBox) {
+        alert('공유할 결과가 없습니다.');
+        return;
+    }
+    html2canvas(resultBox).then(canvas => {
+        canvas.toBlob(blob => {
+            if (navigator.canShare && navigator.canShare({ files: [new File([blob], 'final_result.png', { type: blob.type })] })) {
+                const file = new File([blob], 'final_result.png', { type: blob.type });
+                navigator.share({ files: [file], title: 'MBTI T/F 최종 분석 결과', text: '내 MBTI T/F 최종 분석 결과를 공유합니다!' });
+            } else {
+                // 이미지 다운로드 fallback
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'final_result.png';
+                link.click();
+                alert('이미지로 저장되었습니다. (공유 기능은 일부 브라우저에서만 지원됩니다)');
+            }
+        }, 'image/png');
+    });
+}
+</script>
 </body>
 </html> 

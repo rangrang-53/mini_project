@@ -1968,6 +1968,10 @@
                 console.log('다음 버튼 표시'); // 디버깅 로그 추가
             }
             nextBtn.style.display = 'block';
+            // showResult 함수 내 uibox.innerHTML 아래에 공유 버튼 추가
+            // uibox.innerHTML += `
+            //     <button class="share-btn" onclick="shareCurrentResult()" style="margin-top:1rem; padding:0.7em 1.5em; border-radius:8px; border:none; background:#1976D2; color:#fff; cursor:pointer; font-family: 'HeirofLight'; font-size:1em; font-weight:bold;">🔗 공유하기</button>
+            // `;
         }
 
         // 다음 질문으로 이동 (새로운 질문 생성)
@@ -2717,10 +2721,16 @@
                     <div style="background: #e3f2fd; padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem; border-left: 4px solid #2196f3; font-family: 'HeirofLight';">
                         ${formatAnalysisText(lastResultData.detailed_analysis || '상세 분석 데이터가 없습니다.')}
                     </div>
+<<<<<<< Updated upstream
                     
                     <h4 style="margin-bottom:0.7em; font-family: 'HeirofBold';">🔍 분석 근거</h4>
                     <div style="background: #fff8e1; padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem; border-left: 4px solid #ff9800; font-family: 'HeirofLight';">
                         ${formatAnalysisText(lastResultData.reasoning || '분석 근거 데이터가 없습니다.')}
+=======
+                    <div class="note-close-btn-wrapper">
+                        <button onclick="shareDetailModal()" style="padding:0.5em 1.5em; border-radius:8px; border:none; background:#1976D2; color:#fff; cursor:pointer; font-family: 'HeirofLight'; margin-right:0.7em;">🔗 이미지로 저장</button>
+                        <button onclick="closeDetailModal()" style="padding:0.5em 1.5em; border-radius:8px; border:none; background:#1976D2; color:#fff; cursor:pointer; font-family: 'HeirofLight';">닫기</button>
+>>>>>>> Stashed changes
                     </div>
                     
                     <h4 style="margin-bottom:0.7em; font-family: 'HeirofBold';">💡 개선 제안</h4>
@@ -2795,5 +2805,74 @@
             }
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script>
+    function shareCurrentResult() {
+        const resultContent = document.querySelector('.result-content');
+        if (!resultContent) {
+            alert('공유할 결과가 없습니다.');
+            return;
+        }
+        html2canvas(resultContent).then(canvas => {
+            canvas.toBlob(blob => {
+                if (navigator.canShare && navigator.canShare({ files: [new File([blob], 'result.png', { type: blob.type })] })) {
+                    const file = new File([blob], 'result.png', { type: blob.type });
+                    navigator.share({ files: [file], title: 'MBTI T/F 분석 결과', text: '내 MBTI T/F 분석 결과를 공유합니다!' });
+                } else {
+                    // 이미지 다운로드 fallback
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL('image/png');
+                    link.download = 'result.png';
+                    link.click();
+                    alert('이미지로 저장되었습니다. (공유 기능은 일부 브라우저에서만 지원됩니다)');
+                }
+            }, 'image/png');
+        });
+    }
+    </script>
+    <script>
+    function shareDetailModal() {
+        const modalContent = document.querySelector('.detail-modal-content');
+        if (!modalContent) {
+            alert('저장할 상세분석이 없습니다.');
+            return;
+        }
+        // 1. 복제 div 생성
+        const clone = modalContent.cloneNode(true);
+        clone.style.position = 'absolute';
+        clone.style.left = '-9999px';
+        clone.style.top = '0';
+        clone.style.display = 'block';
+        clone.style.maxHeight = 'none';
+        clone.style.height = 'auto';
+        clone.style.overflow = 'visible';
+        clone.style.boxShadow = '0 4px 32px rgba(0,0,0,0.18)';
+        clone.style.zIndex = '99999';
+        // 내부 스크롤 영역도 모두 해제
+        const scrollAreas = clone.querySelectorAll('.note-scroll-area, .detail-modal-content');
+        scrollAreas.forEach(el => {
+            el.style.maxHeight = 'none';
+            el.style.height = 'auto';
+            el.style.overflow = 'visible';
+        });
+        document.body.appendChild(clone);
+        // 2. 캡처
+        html2canvas(clone).then(canvas => {
+            // 3. 복제 div 삭제
+            document.body.removeChild(clone);
+            if (confirm('이미지로 저장하시겠습니까? (확인 시 다운로드 폴더에 저장됩니다)')) {
+                canvas.toBlob(blob => {
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL('image/png');
+                    link.download = 'detail_review.png';
+                    link.click();
+                    alert('저장이 완료되었습니다.');
+                }, 'image/png');
+            }
+        });
+    }
+    </script>
+    <!-- body 끝나기 전(</body> 직전)에 캡처용 div 추가 -->
+    <div id="capture-area" style="display:none; position:absolute; left:-9999px; width:600px; min-height:300px; background:url('/images/note.png') no-repeat center center; background-size:cover; border-radius:16px; box-shadow:0 4px 32px rgba(0,0,0,0.18); padding:2.5em 2em 2em 2em; font-family:'HeirofLight',sans-serif; color:#222;"></div>
 </body>
 </html> 
