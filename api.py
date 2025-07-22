@@ -1851,9 +1851,8 @@ async def speech_to_text(audio_file: UploadFile = File(...)):
                 temp_audio.write(content)
                 temp_audio.flush()
                 os.fsync(temp_audio.fileno())
-            # 파일을 사용할 때도 항상 with open으로 열기
-            with open(temp_audio_path, "rb") as f:
-                pass  # 실제로 파일을 읽는 부분이 있다면 여기에 작성
+            
+            print(f"Processing audio file: {temp_audio_path}")
             # 모듈화된 STT 함수 사용
             text = transcribe_audio_file(temp_audio_path)
             print(f"STT result: {text}")
@@ -1884,9 +1883,6 @@ async def speech_to_text_enhanced(audio_file: UploadFile = File(...), language: 
             content = await audio_file.read()
             temp_file.write(content)
             temp_file_path = temp_file.name
-        # 파일을 사용할 때도 항상 with open으로 열기
-        with open(temp_file_path, "rb") as f:
-            pass  # 실제로 파일을 읽는 부분이 있다면 여기에 작성
         
         print(f"Processing audio file: {temp_file_path}")
         
